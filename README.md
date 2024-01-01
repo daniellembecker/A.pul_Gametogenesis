@@ -1,5 +1,5 @@
 
-### Title: Timing and patterns of gametogenesis in Acropora pulchra in Mo’orea, French Polynesia
+### Title: Gametogenesis and reproductive pattern of the reef-building coral Acropora pulchra in Mo’orea, French Polynesia
 
 ### Authors: TBD
 
