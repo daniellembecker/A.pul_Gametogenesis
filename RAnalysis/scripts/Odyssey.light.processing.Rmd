@@ -1,0 +1,103 @@
+---
+title: "Odyssey_light_processing"
+author: "daniellembecker"
+date: "01/29/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Processing temperature data for from HOBO loggers out at Mahana from February-April
+
+
+##Install packages
+# load packages
+
+```{r}
+library("segmented")
+library("devtools")
+library("plotrix")
+library("gridExtra")
+library("LoLinR")
+library("lubridate")
+library('tidyverse')
+library('lubridate')
+library('scales')
+```
+
+
+#load light data
+
+```{r}
+odyssey.1 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15640_001_003.csv")
+odyssey.2 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15641_001_003.csv")
+
+```
+
+
+```{r}
+odyssey.1 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15640_001_003.csv")
+odyssey.2 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15641_001_003.csv")
+
+```
+
+#bind all data sets together into one data frame
+
+```{r}
+light.data <- rbind(odyssey.1, odyssey.2)
+```
+
+
+#remove any NA's from the data frame
+```{r}
+light.data <- na.omit(light.data)
+
+view(light.data)
+```
+
+
+```{r}
+# Combine Date and Time columns into a new column named DateTime
+light.data$DateTime <- with(light.data, {
+  dmy_hms(paste(date, time), truncated = 2)  # truncated = 2 allows for two-digit years
+})
+
+# Separate date and time from the "date.temp" column
+light.data.sep <- light.data %>%
+  separate(DateTime, into = c("Date", "Time"), sep = " ")
+
+# Assuming your "Date" column is in a character format
+light.data.sep$Date <- as.Date(light.data.sep$Date, format = "%Y-%m-%d")
+
+# Group by Date and calculate the mean temperature for each day
+mean_light_per_day <- light.data.sep %>%
+  group_by(Date) %>%
+  summarise(mean_light = mean(calibrated))
+
+```
+
+```{r}
+#compare  light across timeseries
+
+light.plot <- mean_light_per_day %>%
+  ggplot(aes(x = Date, y = mean_light)) +
+  geom_line() + 
+  geom_point() +
+  scale_x_date(date_breaks = "4 days", date_labels = "%m-%d") +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 90, size = 16),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 16)) +
+  xlab("Date") +
+  ylab(expression(atop("Light Intensity", (mu*mol~m^{-2}~s^{-1})))); light.plot
+
+
+ggsave(filename="RAnalysis/output/HOBO/20240129_light_logger_plot.pdf", plot=light.plot, width=30, height=10, units="in")
+
+ggsave(filename="RAnalysis/output/HOBO/20240129_light_logger_plot.png", plot=light.plot, width=20, height=10, units="in")
+
+```
+

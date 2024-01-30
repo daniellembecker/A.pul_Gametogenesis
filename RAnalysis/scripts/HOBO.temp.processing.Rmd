@@ -31,15 +31,25 @@ library('scales')
 #load temp data
 
 ```{r}
-mahana.temp.hobo.06 <- read.csv("RAnalysis/data/HOBO/April2022/Mahana_6.csv")
-mahana.temp.hobo.09 <- read.csv("RAnalysis/data/HOBO/April2022/Mahana_9.csv")
+mahana.temp.hobo.06 <- read.csv("RAnalysis/data/HOBO/April2022_mahana_loggers/Mahana_6.csv")
+mahana.temp.hobo.09 <- read.csv("RAnalysis/data/HOBO/April2022_mahana_loggers/Mahana_9.csv")
+mahana.temp.hobo.07 <- read.csv("RAnalysis/data/HOBO/April2022_mahana_loggers/20444028_Mahana_7.csv")
+mahana.temp.hobo.10 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_10.csv")
+mahana.temp.hobo.11 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_11.csv")
+mahana.temp.hobo.12 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_12.csv")
+mahana.temp.hobo.13 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_13.csv")
+mahana.temp.hobo.08 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_8.csv")
+mahana.temp.hobo.05 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_5.csv")
+mahana.temp.hobo.04 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_4.csv")
+mahana.temp.hobo.03 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_3.csv")
+mahana.temp.hobo.02 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_2.csv")
 ```
 
 
 #bind all data sets together into one data frame
 
 ```{r}
-temp.data <- rbind(mahana.temp.hobo.06, mahana.temp.hobo.09)
+temp.data <- rbind(mahana.temp.hobo.02, mahana.temp.hobo.03, mahana.temp.hobo.04, mahana.temp.hobo.05, mahana.temp.hobo.06, mahana.temp.hobo.07, mahana.temp.hobo.08, mahana.temp.hobo.09, mahana.temp.hobo.10, mahana.temp.hobo.11, mahana.temp.hobo.12, mahana.temp.hobo.13)
 ```
 
 
@@ -59,7 +69,7 @@ temp.data$date.time <- mdy_hm(temp.data$date.time, quiet=FALSE, tz="UTC", trunca
 
 #save file as csv so transforms to data frame
 ```{r}
-write.csv(temp.data, 'RAnalysis/output/HOBO/20220405_mahana_temp_data.csv')
+write.csv(temp.data, 'RAnalysis/output/HOBO/20240129_mahana_temp_data.csv')
 ```
  
 
@@ -69,26 +79,50 @@ temp.data$logger.number = as.factor(temp.data$logger.number)
 ```
 
 
-#subset temp data for March through April 
+#subset temp data for mean across loggers
 ```{r}
-temp.data.subset <- temp.data %>%
-  filter(lubridate::month(date.time) %in% c(03:04)) 
+# Separate date and temperature from the "date.temp" column
+temp.data.sep <- temp.data %>%
+  separate(date.time, into = c("date", "time"), sep = " ")
+
+# Convert Temp to numeric
+temp.data.sep$temp <- as.numeric(temp.data.sep$temp)
+
+# Group by Date and calculate the mean temperature for each day
+mean_temp_per_day <- temp.data.sep %>%
+  group_by(date) %>%
+  summarise(mean_temp = mean(temp))
+
+# Assuming your "date" column is not yet of class Date
+mean_temp_per_day$date <- as.Date(mean_temp_per_day$date)
+
+filtered_data <- mean_temp_per_day %>%
+  filter((date >= as.Date("2022-01-24") & date <= as.Date("2022-11-04")))
+
+filtered_data <- filtered_data %>%
+  filter(date != as.Date("2022-08-07"))
+
 ```
 
 
 #plot data by hobo logger per day no average
 
 ```{r}
-temp.plot <- temp.data.subset %>%
-  ggplot(aes(x=date.time, y=temp, color = logger.number))+
+
+temp.plot <- filtered_data %>%
+  ggplot(aes(x=date, y=mean_temp))+
   geom_line() + 
   geom_point() +
-  scale_x_datetime(date_breaks = "1 day", date_labels = "%m-%d") +
+  scale_x_date(date_breaks = "4 day", date_labels = "%m-%d") +
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90)) +
   ylab("Temperature (°C)")+
-  xlab("Date");temp.plot
+  xlab("Date")+
+  theme(axis.title = element_text(size = 16),   # Adjust the size of x and y axis labels
+        axis.text = element_text(size = 16)) ;temp.plot
 
-ggsave(filename="RAnalysis/output/HOBO/20220405_temp_logger_plot.pdf", plot=temp.plot, width=20, height=10, units="in")
+ggsave(filename="RAnalysis/output/HOBO/20240129_temp_logger_plot.pdf", plot=temp.plot, width=30, height=10, units="in")
+
+ggsave(filename="RAnalysis/output/HOBO/20240129_temp_logger_plot.png", plot=temp.plot, width=20, height=10, units="in")
 ```
 
