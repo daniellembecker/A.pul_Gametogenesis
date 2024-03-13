@@ -1,5 +1,6 @@
 # Sampling Date
-October 11, 2022 - All *Acropora* (n = 40) and backreef Mahana *Pocillopora* samples (n =10)
+November 11, 2022 - All *Acropora* (n = 40) and backreef Mahana *Pocillopora* samples (n =10)
+November 10, 2022 - Forereef *Pocillopora* samples (n =10)
 
 # Participants
 Danielle, Hollie, Pierrick, Alex
