@@ -41,7 +41,7 @@ df_relative_abundance$Stage <- factor(df_relative_abundance$Stage, levels = c("S
 
 ```
 
-Oogenesis
+# Plot Oogenesis abundance plots
 ```{r}
 # select just oocytes, remove any spermatocyte data
 oogen_df_relative_abundance <- df_relative_abundance %>%
@@ -73,7 +73,7 @@ oogen
 
 ```
 
-Spermatogenesis
+# Plot Spermatogenesis abundance plots
 ```{r}
 spermato_df_relative_abundance <- df_relative_abundance %>%
   filter(!gonad.type=="oocyte")
@@ -89,15 +89,63 @@ spermato <- spermato_df_relative_abundance %>% ggplot(aes(x=colony_id, y=freq, g
 spermato
 ```
 
+# Arrange and save abundance plots
+```{r}
+# save oogenesis plot
+ggsave("histology/output/oogenesis_abundance.pdf", oogen , width = 10, height = 6)
+ggsave("histology/output/oogenesis_abundance.jpg", oogen , width = 10, height = 6)
+
+#plots <- grid.arrange(oogen, spermato, nrow = 2)
 
 
-Arrange and save plots
+```
+
+# Plot Oogenesis size plots
 ```{r}
 
-plots <- grid.arrange(oogen, spermato, nrow = 2)
+# select for grand mean size dataframe
+oogen_size <- abundance %>%
+  select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage)  # Selecting 'replicate_id' and 'freq' columns
 
-ggsave("histology/output/Gametogenesis.pdf", plots , width = 10, height = 6)
-ggsave("histology/output/Gametogenesis.jpg", plots , width = 10, height = 6)
+# Reorder the levels of the 'timepoint' variable from December to October
+oogen_size$timepoint <- factor(oogen_size$timepoint, 
+                                                 levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
+                                                 ordered = TRUE)
+
+
+# Calculate mean oocyte size per month
+mean_size <- oogen_size %>%
+  group_by(timepoint, replicate_id) %>%
+  summarise(mean_size = mean(geometric.mean, na.rm = TRUE))
+
+# Plot with reordered months and size
+oogen.size.plot <- mean_size %>% 
+  ggplot(aes(x = replicate_id, y = mean_size)) +
+  geom_col() +
+  facet_wrap(~ timepoint, ncol = 11) +
+  theme_bw() +
+  ylab("Oocyte Diameter (microns)") +
+  xlab("Colony ID") +
+  theme(axis.text.x = element_text(angle = 90),
+        legend.position = "top",  # Move legend to top
+        legend.title = element_blank()) +  
+  ylab(expression("Oocyte diameter ("*mu*"m)")) +
+  scale_y_continuous(expand = c(0, 0))  + # Ensure the y-axis starts at 0
+  guides(fill = guide_legend(ncol = length(unique(oogen_size$Stage)), byrow = TRUE))  # Set ncol and byrow for the legend # Remove legend titles
+
+oogen.size.plot
+
+
+
+```
+
+# Arrange and save size plots
+```{r}
+# save oogenesis plot
+ggsave("histology/output/oogenesis_size.pdf", oogen.size.plot , width = 10, height = 6)
+ggsave("histology/output/oogenesis_size.jpg", oogen.size.plot , width = 10, height = 6)
+
+#plots <- grid.arrange(oogen, spermato, nrow = 2)
 
 
 ```
