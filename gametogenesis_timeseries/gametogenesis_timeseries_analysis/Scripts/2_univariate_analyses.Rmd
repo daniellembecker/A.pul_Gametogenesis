@@ -30,6 +30,7 @@ if (!require("ggcorrplot")) install.packages("ggcorrplot")
 if (!require("GGally")) install.packages("GGally")
 if (!require("broom")) install.packages("broom")
 if (!require("cowplot")) install.packages("cowplot")
+if (!require("lsmeans")) install.packages("lsmeans")
 
 # load packages
 library(tidyverse)
@@ -55,6 +56,7 @@ library(dplyr)
 library(plyr)
 library(grid)
 library(gridExtra)
+library(lsmeans)
 ```
 
 # Load dataframe
@@ -62,6 +64,16 @@ library(gridExtra)
 Load in master dataframe generated from 1_assemble_data.Rmd.  
 ```{r}
 master<-read.csv("gametogenesis_timeseries_analysis/Output/master_timeseries.csv")
+
+# read in metadata to add patch to master timeseries
+metadata <- read.csv("gametogenesis_timeseries_analysis/master_metadata.csv")
+
+# add ACR- before each tag number
+metadata <- metadata %>%
+  mutate(colony_id = paste0("ACR-", colony_id))
+
+#commbine master and metadata
+master <- left_join(master, metadata)
 
 #rename AUG september and october
 
@@ -86,38 +98,51 @@ Plot univariate response plots and then generate panel of all plots at the end o
 View by treatment and timepoint.
 ```{r}
 
-symbplot_cm2<-master %>%
-  filter(!is.na(cells.cm2)) %>%
-  filter(!is.na(timepoint))%>%
-  select(colony_id, timepoint, cells.cm2)%>%
-  
-  ggplot(., aes(x = timepoint, y = cells.cm2, fill=timepoint)) +
-    geom_boxplot(color="black", fill="white", alpha=0.2) +
-    geom_point(pch = 21, size=2, position = position_jitterdodge(0.2)) + 
-  scale_x_discrete(limits = c("JAN","FEB","MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
-    xlab("") + 
-    ylab(expression(bold(paste("Symbiont Cells cm"^-2))))+
-    theme_classic() + 
-    theme(legend.position = "none",
-      axis.title=element_text(face="bold", size=60),
-      axis.text=element_text(size=40, color="black"), 
-      strip.text.x=element_text(face="italic", size=40)); symbplot_cm2
-
-
-# Fit a linear model (ANOVA)
-model <- aov(cells.cm2 ~ timepoint, data = master)
+# Fit a mixed-effects model with 'patch' as a random effect
+model <- lmer(cells.cm2 ~ timepoint + (1|patch), data = master)
 
 # Perform ANOVA
 anova_results <- Anova(model, type = "II")
 
-# Display the ANOVA table
-print(anova_results)
-
 # Post-hoc pairwise comparisons (optional)
-pairwise_results <- lsmeans(model, pairwise ~ timepoint, adjust = "tukey")
+pairwise_results <- emmeans(model, pairwise ~ timepoint, adjust = "tukey")
 
-# Display the pairwise comparison results
-print(pairwise_results)
+
+# Extract pairwise comparisons
+pairwise_comparisons <- pairs(pairwise_results)
+
+# Filter significant comparisons
+significant_comparisons <- summary(pairwise_comparisons, test = "adjusted", by = NULL, infer = TRUE)
+
+# Extract significant comparisons
+significant_contrasts <- subset(significant_comparisons, p.value < 0.05)
+
+# Create the plot
+symbplot_cm2 <- master %>%
+  filter(!is.na(cells.cm2)) %>%
+  filter(!is.na(timepoint)) %>%
+  select(colony_id, timepoint, cells.cm2) %>%
+  
+  ggplot(., aes(x = timepoint, y = cells.cm2, fill = timepoint)) +
+  geom_boxplot(color = "black", fill = "white", alpha = 0.2) +
+  geom_point(pch = 21, size = 2, position = position_jitterdodge(0.2)) +
+  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
+  xlab("") + 
+  ylab(expression(bold(paste("Symbiont Cells cm"^-2)))) +
+  theme_classic() + 
+  theme(legend.position = "none",
+        axis.title = element_text(face = "bold", size = 20),
+        axis.text = element_text(size = 12, color = "black"), 
+        strip.text.x = element_text(face = "italic", size = 12))
+
+# Add significance stars
+symbplot_cm2 +
+  geom_signif(data = significant_contrasts, 
+              aes(x = timepoint, y = ymax + 5, annotations = as.character(p.value)), 
+              inherit.aes = FALSE,
+              manual = TRUE,
+              step_increase = 0.1,
+              vjust = -0.5)
 
 
 ```
