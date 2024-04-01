@@ -32,18 +32,18 @@ library('scales')
 #load temp data
 
 ```{r}
-mahana.temp.hobo.06 <- read.csv("RAnalysis/data/environmental/April2022_mahana_loggers/Mahana_6.csv")
-mahana.temp.hobo.09 <- read.csv("RAnalysis/data/environmental/April2022_mahana_loggers/Mahana_9.csv")
-mahana.temp.hobo.07 <- read.csv("RAnalysis/data/environmental/April2022_mahana_loggers/20444028_Mahana_7.csv")
-mahana.temp.hobo.10 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_10.csv")
-mahana.temp.hobo.11 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_11.csv")
-mahana.temp.hobo.12 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_12.csv")
-mahana.temp.hobo.13 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_13.csv")
-mahana.temp.hobo.08 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_8.csv")
-mahana.temp.hobo.05 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_5.csv")
-mahana.temp.hobo.04 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_4.csv")
-mahana.temp.hobo.03 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_3.csv")
-mahana.temp.hobo.02 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_2.csv")
+mahana.temp.hobo.06 <- read.csv("RAnalysis/data/HOBO/April2022_mahana_loggers/Mahana_6.csv")
+mahana.temp.hobo.09 <- read.csv("RAnalysis/data/HOBO/April2022_mahana_loggers/Mahana_9.csv")
+mahana.temp.hobo.07 <- read.csv("RAnalysis/data/HOBO/April2022_mahana_loggers/20444028_Mahana_7.csv")
+mahana.temp.hobo.10 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_10.csv")
+mahana.temp.hobo.11 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_11.csv")
+mahana.temp.hobo.12 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_12.csv")
+mahana.temp.hobo.13 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_13.csv")
+mahana.temp.hobo.08 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_8.csv")
+mahana.temp.hobo.05 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_5.csv")
+mahana.temp.hobo.04 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_4.csv")
+mahana.temp.hobo.03 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_3.csv")
+mahana.temp.hobo.02 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_2.csv")
 ```
 
 
@@ -165,15 +165,15 @@ ggsave("RAnalysis/output/environmental/mean.temp.month.jpg", temp.month , width 
 #load light data
 
 ```{r}
-odyssey.1 <- read.csv("RAnalysis/data/environmental/odyssey_light_loggers/15640_001_003.csv")
-odyssey.2 <- read.csv("RAnalysis/data/environmental/odyssey_light_loggers/15641_001_003.csv")
+odyssey.1 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15640_001_003.csv")
+odyssey.2 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15641_001_003.csv")
 
 ```
 
 
 ```{r}
-odyssey.1 <- read.csv("RAnalysis/data/environmental/odyssey_light_loggers/15640_001_003.csv")
-odyssey.2 <- read.csv("RAnalysis/data/environmental/odyssey_light_loggers/15641_001_003.csv")
+odyssey.1 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15640_001_003.csv")
+odyssey.2 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15641_001_003.csv")
 
 ```
 
@@ -261,7 +261,53 @@ light.month
 
 # save mean temp per month plot
 ggsave("RAnalysis/output/environmental/mean.light.month.pdf", light.month , width = 10, height = 6)
-ggsave("RAnalysis/output/environmental/mean.light.month.jpg", .month , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/mean.light.month.jpg", light.month , width = 10, height = 6)
+
+
+```
+
+# Make a commbined plot of light and temperature
+
+```{r}
+# Combine light and temperature data
+
+# rename date column to Date in mean_temp_per_day
+#mean_temp_per_day <- mean_temp_per_day %>%
+ # rename(Date = date)
+
+# make combined data file
+#combined_data <- full_join(mean_light_per_day, mean_temp_per_day, by = "Date")
+
+#make combined data by month
+# Assuming 'mean_light_per_month' and 'mean_temp_per_month' are your data frames with mean values per month for light intensity and temperature, respectively
+
+# Joining the data frames
+mean_monthly_data <- full_join(mean_light_per_month, mean_temp_per_month, by = "month")
+
+# Remove NAs only from mean_light column
+mean_monthly_data_light <- mean_monthly_data[!is.na(mean_monthly_data$mean_light), ]
+
+# Plotting code
+ggplot(mean_monthly_data, aes(x = month)) +
+  geom_point(aes(y = mean_temp, color = "Temperature", group = 1), size = 3) +  # Add points for temperature
+  geom_line(aes(y = mean_temp, color = "Temperature", group = 1)) +  # Add lines for temperature
+  geom_point(aes(y = mean_light, color = "Light Intensity", group = 1), size = 3) +  # Add points for light intensity
+  geom_line(aes(y = mean_light, color = "Light Intensity", group = 1)) +  # Add lines for light intensity
+  scale_y_continuous(
+    name = "Temperature",
+    limits = c(26, 29),  # Set limits for the primary y-axis
+    sec.axis = sec_axis(~ ., name = "Light Intensity", 
+                        breaks = seq(2000, 4500, by = 500),
+                        labels = seq(2000, 4500, by = 500))) +  # Labels for secondary y-axis
+  scale_color_manual(values = c("Temperature" = "black", "Light Intensity" = "grey")) +  # Set colors
+  labs(x = "Month", y = NULL, ysec = NULL) +  # Set labels for axes
+  theme_classic() +
+  theme(
+    axis.title.y = element_text(color = "black", size = 13),
+    axis.title.y.right = element_text(color = "grey", size = 13),
+    axis.text.y.right = element_text(color = "grey", size = 13)
+  )
+
 
 
 ```
