@@ -291,22 +291,25 @@ mean_monthly_data_light <- mean_monthly_data[!is.na(mean_monthly_data$mean_light
 ggplot(mean_monthly_data, aes(x = month)) +
   geom_point(aes(y = mean_temp, color = "Temperature", group = 1), size = 3) +  # Add points for temperature
   geom_line(aes(y = mean_temp, color = "Temperature", group = 1)) +  # Add lines for temperature
-  geom_point(aes(y = mean_light, color = "Light Intensity", group = 1), size = 3) +  # Add points for light intensity
-  geom_line(aes(y = mean_light, color = "Light Intensity", group = 1)) +  # Add lines for light intensity
+  geom_point(aes(y = mean_light / 120, color = "Light Intensity", group = 1), size = 3) +  # Add points for light intensity
+  geom_line(aes(y = mean_light / 120, color = "Light Intensity", group = 1)) +  # Add lines for light intensity
   scale_y_continuous(
-    name = "Temperature",
-    limits = c(26, 29),  # Set limits for the primary y-axis
-    sec.axis = sec_axis(~ ., name = "Light Intensity", 
-                        breaks = seq(2000, 4500, by = 500),
-                        labels = seq(2000, 4500, by = 500))) +  # Labels for secondary y-axis
+    sec.axis = sec_axis(~ . * 120, name = "Light Intensity") , 
+    limits = c(12, 29)) + # Set limits for the primary y-axis)) 
   scale_color_manual(values = c("Temperature" = "black", "Light Intensity" = "grey")) +  # Set colors
-  labs(x = "Month", y = NULL, ysec = NULL) +  # Set labels for axes
+  labs(x = "Month", y = NULL) +
   theme_classic() +
   theme(
     axis.title.y = element_text(color = "black", size = 13),
     axis.title.y.right = element_text(color = "grey", size = 13),
     axis.text.y.right = element_text(color = "grey", size = 13)
   )
+
+
+
+
+
+
 
 
 
