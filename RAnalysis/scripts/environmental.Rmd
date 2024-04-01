@@ -32,18 +32,18 @@ library('scales')
 #load temp data
 
 ```{r}
-mahana.temp.hobo.06 <- read.csv("RAnalysis/data/HOBO/April2022_mahana_loggers/Mahana_6.csv")
-mahana.temp.hobo.09 <- read.csv("RAnalysis/data/HOBO/April2022_mahana_loggers/Mahana_9.csv")
-mahana.temp.hobo.07 <- read.csv("RAnalysis/data/HOBO/April2022_mahana_loggers/20444028_Mahana_7.csv")
-mahana.temp.hobo.10 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_10.csv")
-mahana.temp.hobo.11 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_11.csv")
-mahana.temp.hobo.12 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_12.csv")
-mahana.temp.hobo.13 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_13.csv")
-mahana.temp.hobo.08 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_8.csv")
-mahana.temp.hobo.05 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_5.csv")
-mahana.temp.hobo.04 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_4.csv")
-mahana.temp.hobo.03 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_3.csv")
-mahana.temp.hobo.02 <- read.csv("RAnalysis/data/HOBO/November2022_mahana_loggers/20221114_Mahana_2.csv")
+mahana.temp.hobo.06 <- read.csv("RAnalysis/data/environmental/April2022_mahana_loggers/Mahana_6.csv")
+mahana.temp.hobo.09 <- read.csv("RAnalysis/data/environmental/April2022_mahana_loggers/Mahana_9.csv")
+mahana.temp.hobo.07 <- read.csv("RAnalysis/data/environmental/April2022_mahana_loggers/20444028_Mahana_7.csv")
+mahana.temp.hobo.10 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_10.csv")
+mahana.temp.hobo.11 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_11.csv")
+mahana.temp.hobo.12 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_12.csv")
+mahana.temp.hobo.13 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_13.csv")
+mahana.temp.hobo.08 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_8.csv")
+mahana.temp.hobo.05 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_5.csv")
+mahana.temp.hobo.04 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_4.csv")
+mahana.temp.hobo.03 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_3.csv")
+mahana.temp.hobo.02 <- read.csv("RAnalysis/data/environmental/November2022_mahana_loggers/20221114_Mahana_2.csv")
 ```
 
 
@@ -70,7 +70,7 @@ temp.data$date.time <- mdy_hm(temp.data$date.time, quiet=FALSE, tz="UTC", trunca
 
 #save file as csv so transforms to data frame
 ```{r}
-write.csv(temp.data, 'RAnalysis/output/HOBO/20240129_mahana_temp_data.csv')
+write.csv(temp.data, 'RAnalysis/output/environmental/20240129_mahana_temp_data.csv')
 ```
  
 
@@ -123,9 +123,9 @@ temp.plot <- filtered_data %>%
   theme(axis.title = element_text(size = 16),   # Adjust the size of x and y axis labels
         axis.text = element_text(size = 16)) ;temp.plot
 
-ggsave(filename="RAnalysis/output/HOBO/20240129_temp_logger_plot.pdf", plot=temp.plot, width=30, height=10, units="in")
+ggsave(filename="RAnalysis/output/environmental/20240129_temp_logger_plot.pdf", plot=temp.plot, width=30, height=10, units="in")
 
-ggsave(filename="RAnalysis/output/HOBO/20240129_temp_logger_plot.png", plot=temp.plot, width=20, height=10, units="in")
+ggsave(filename="RAnalysis/output/environmental/20240129_temp_logger_plot.png", plot=temp.plot, width=20, height=10, units="in")
 ```
 
 # plot temeprature mean sea surface temp per month
@@ -153,8 +153,8 @@ temp.month <- ggplot(mean_temp_per_month, aes(x = as.numeric(month), y = mean_te
 temp.month
 
 # save mean temp per month plot
-ggsave("RAnalysis/output/HOBO/mean.temp.month.pdf", temp.month , width = 10, height = 6)
-ggsave("RAnalysis/output/HOBO/mean.temp.month.jpg", temp.month , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/mean.temp.month.pdf", temp.month , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/mean.temp.month.jpg", temp.month , width = 10, height = 6)
 
 
 ```
@@ -165,15 +165,15 @@ ggsave("RAnalysis/output/HOBO/mean.temp.month.jpg", temp.month , width = 10, hei
 #load light data
 
 ```{r}
-odyssey.1 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15640_001_003.csv")
-odyssey.2 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15641_001_003.csv")
+odyssey.1 <- read.csv("RAnalysis/data/environmental/odyssey_light_loggers/15640_001_003.csv")
+odyssey.2 <- read.csv("RAnalysis/data/environmental/odyssey_light_loggers/15641_001_003.csv")
 
 ```
 
 
 ```{r}
-odyssey.1 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15640_001_003.csv")
-odyssey.2 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15641_001_003.csv")
+odyssey.1 <- read.csv("RAnalysis/data/environmental/odyssey_light_loggers/15640_001_003.csv")
+odyssey.2 <- read.csv("RAnalysis/data/environmental/odyssey_light_loggers/15641_001_003.csv")
 
 ```
 
@@ -229,9 +229,9 @@ light.plot <- mean_light_per_day %>%
   ylab(expression(atop("Light Intensity", (mu*mol~m^{-2}~s^{-1})))); light.plot
 
 
-ggsave(filename="RAnalysis/output/HOBO/20240129_light_logger_plot.pdf", plot=light.plot, width=30, height=10, units="in")
+ggsave(filename="RAnalysis/output/environmental/20240129_light_logger_plot.pdf", plot=light.plot, width=30, height=10, units="in")
 
-ggsave(filename="RAnalysis/output/HOBO/20240129_light_logger_plot.png", plot=light.plot, width=20, height=10, units="in")
+ggsave(filename="RAnalysis/output/environmental/20240129_light_logger_plot.png", plot=light.plot, width=20, height=10, units="in")
 
 ```
 
@@ -260,8 +260,8 @@ light.month <- ggplot(mean_light_per_month, aes(x = as.numeric(month), y = mean_
 light.month
 
 # save mean temp per month plot
-ggsave("RAnalysis/output/HOBO/mean.light.month.pdf", light.month , width = 10, height = 6)
-ggsave("RAnalysis/output/HOBO/mean.light.month.jpg", .month , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/mean.light.month.pdf", light.month , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/mean.light.month.jpg", .month , width = 10, height = 6)
 
 
 ```
