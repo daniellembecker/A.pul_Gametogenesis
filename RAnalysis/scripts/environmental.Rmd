@@ -24,6 +24,7 @@ library("lubridate")
 library('tidyverse')
 library('lubridate')
 library('scales')
+library('patchwork')
 
 ```
 
@@ -263,7 +264,6 @@ light.month
 ggsave("RAnalysis/output/environmental/mean.light.month.pdf", light.month , width = 10, height = 6)
 ggsave("RAnalysis/output/environmental/mean.light.month.jpg", light.month , width = 10, height = 6)
 
-
 ```
 
 # Make a commbined plot of light and temperature
@@ -291,10 +291,10 @@ mean_monthly_data_light <- mean_monthly_data[!is.na(mean_monthly_data$mean_light
 ggplot(mean_monthly_data, aes(x = month)) +
   geom_point(aes(y = mean_temp, color = "Temperature", group = 1), size = 3) +  # Add points for temperature
   geom_line(aes(y = mean_temp, color = "Temperature", group = 1)) +  # Add lines for temperature
-  geom_point(aes(y = mean_light / 250 + 18, color = "Light Intensity", group = 1), size = 3) +  # Add points for light intensity
-  geom_line(aes(y = mean_light  / 250 + 18, color = "Light Intensity", group = 1)) +  # Add lines for light intensity
+  geom_point(aes(y = (mean_light - 2000) / 833 + 26, color = "Light Intensity", group = 1), size = 3) +  # Add points for light intensity
+  geom_line(aes(y = (mean_light - 2000) / 833 + 26, color = "Light Intensity", group = 1)) +  # Add lines for light intensity
   scale_y_continuous(
-    sec.axis = sec_axis(~ . * 250, name = "Light Intensity") , name = "Mean Sea Surface Temperature (°C)",
+    sec.axis = sec_axis(~ (. - 26) * 833 + 2000, name = "Light Intensity") , name = "Mean Sea Surface Temperature (°C)",
     limits = c(26, 29)) + # Set limits for the primary y-axis)) 
   scale_color_manual(values = c("Temperature" = "black", "Light Intensity" = "grey")) +  # Set colors
   labs(x = "Month", y = NULL) +
@@ -304,11 +304,6 @@ ggplot(mean_monthly_data, aes(x = month)) +
     axis.title.y.right = element_text(color = "grey", size = 13),
     axis.text.y.right = element_text(color = "grey", size = 13)
   )
-
-
-
-
-
 
 
 
