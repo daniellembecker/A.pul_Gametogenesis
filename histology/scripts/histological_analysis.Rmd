@@ -52,13 +52,11 @@ oogen_df_relative_abundance$timepoint <- factor(oogen_df_relative_abundance$time
                                                  levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
                                                  ordered = TRUE)
 
+
 # Plot with reordered months and unique grand_tots on x-axis
 oogen <- oogen_df_relative_abundance %>% 
-  ggplot(aes(x = replicate_id, y = freq, group = Stage, color = Stage, fill = Stage)) +
+  ggplot(aes(x = replicate_id, y = freq, fill = Stage)) +
   geom_col() +
-  geom_text(data = unique(oogen_df_relative_abundance[, c("replicate_id", "grand_tots")]), 
-            aes(x = replicate_id, y = -0.5, label = grand_tots), 
-            vjust = 0, color = "black", size = 3) +  # Add unique grand_tots numbers on x-axis
   facet_wrap(~ timepoint, ncol = 11) +
   theme_bw() +
   ylab("Proportion of Oocytes") +
@@ -71,6 +69,7 @@ oogen <- oogen_df_relative_abundance %>%
          fill = guide_legend(ncol = length(unique(oogen_df_relative_abundance$Stage)), byrow = TRUE))  # Set ncol and byrow for the legend # Remove legend titles
 
 oogen
+
 
 ```
 
