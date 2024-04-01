@@ -13,7 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library("tidyverse")
 library("gridExtra")
-library()
+library("ghibli")
+library("PNWColors")
+library("lubridate")
 ```
 
 ## Load data & select specific columns 
@@ -61,7 +63,11 @@ oogen <- oogen_df_relative_abundance %>%
   theme_bw() +
   ylab("Proportion of Oocytes") +
   xlab("Colony ID") +
-  theme(axis.text.x = element_text(angle = 90),legend.position = "top",legend.title = element_blank()) +  
+  theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
+        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
+        legend.position = "top",
+        legend.title = element_blank(),
+        text = element_text(size = 18)) +  # Increase size of all other text elements
   scale_y_continuous(expand = c(0, 0)) +
   guides(color = guide_legend(ncol = length(unique(oogen_df_relative_abundance$Stage)), byrow = TRUE), fill = guide_legend(ncol = length(unique(oogen_df_relative_abundance$Stage)), byrow = TRUE))
 
@@ -69,9 +75,13 @@ oogen
 
 # Add grand_tots value on the x-axis
 oogen2 <- oogen +
-  geom_text(aes(x = replicate_id, y = 0, label = grand_tots), vjust = -0.5, size = 3, color = "black")
+  geom_text(aes(x = replicate_id, y = 0, label = grand_tots), vjust = -0.5, size = 5, color = "black")
 
 oogen2
+
+# save oogenesis plot
+ggsave("histology/output/oogenesis_abundance.pdf", oogen2 , width = 13, height = 8)
+ggsave("histology/output/oogenesis_abundance.jpg", oogen2 , width = 13, height = 8)
 
 
 ```
@@ -94,22 +104,24 @@ spermato
 
 # Arrange and save abundance plots
 ```{r}
-# save oogenesis plot
-ggsave("histology/output/oogenesis_abundance.pdf", oogen2 , width = 10, height = 6)
-ggsave("histology/output/oogenesis_abundance.jpg", oogen2 , width = 10, height = 6)
 
 #plots <- grid.arrange(oogen, spermato, nrow = 2)
 
 
 ```
 
-# Plot Oogenesis size plots
+# Plot Oogenesis size by replicate 
 ```{r}
 
 # select for grand mean size dataframe
 oogen_size <- abundance %>%
   dplyr::select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage) 
 
+# select just oocytes, remove any spermatocyte data
+oogen_size <- oogen_size %>%
+  filter(gonad.type != "spermatocyte")
+
+# count number of oocytes per timmepoint for count on x axis
 oogen_size <- oogen_size %>%
   group_by(colony_id, timepoint) %>%
   mutate(count = n()) %>%
@@ -117,6 +129,138 @@ oogen_size <- oogen_size %>%
 
 # Reorder the levels of the 'timepoint' variable from December to October
 oogen_size$timepoint <- factor(oogen_size$timepoint, 
+                                                 levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
+                                                 ordered = TRUE)
+
+# Calculate mean oocyte size per month per replicate
+mean_size <- oogen_size %>%
+  group_by(timepoint, replicate_id, count) %>%
+  summarise(mean_size = mean(geometric.mean, na.rm = TRUE))
+
+# Plot with reordered months and size and by replicate
+oogen.size.plot <- mean_size %>% 
+  ggplot(aes(x = replicate_id, y = mean_size)) +
+  geom_col() +
+  facet_wrap(~ timepoint, ncol = 11) +
+  theme_bw() +
+  ylab("Oocyte Diameter (microns)") +
+  xlab("Colony ID") +
+  theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
+        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
+        legend.position = "top",
+        legend.title = element_blank(),
+        text = element_text(size = 18)) +  # Increase size of all other text elements
+  ylab(expression("Mean oocyte diameter ("*mu*"m)")) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 400)) + # Ensure the y-axis starts at 0
+  guides(fill = guide_legend(ncol = length(unique(oogen_size$Stage)), byrow = TRUE))  # Set ncol and byrow for the legend # Remove legend titles
+
+oogen.size.plot
+
+# Add count value on the x-axis
+oogen.size.plot2 <- oogen.size.plot +
+  geom_text(aes(x = replicate_id, y = 0, label = count), vjust = -0.5, size = 5, color = "black")
+
+oogen.size.plot2
+
+# save oogenesis size plots
+ggsave("histology/output/oogenesis_size.pdf", oogen.size.plot2 , width = 13, height = 8)
+ggsave("histology/output/oogenesis_size.jpg", oogen.size.plot2 , width = 13, height = 8)
+
+
+```
+
+# Plot oogenesis mean size by month
+
+```{r}
+# Calculate mean oocyte size per month per replicate
+mean_size_month <- oogen_size %>%
+  group_by(timepoint) %>%
+  summarise(mean_size = mean(geometric.mean, na.rm = TRUE),
+            std_error = sd(geometric.mean, na.rm = TRUE) / sqrt(n())) 
+
+# Abbreviate month names
+mean_size_month$abbreviated_timepoint <- month.abb[match(mean_size_month$timepoint, month.name)]
+
+# Reorder the levels of the 'timepoint' variable from December to October
+mean_size_month$abbreviated_timepoint <- factor(mean_size_month$abbreviated_timepoint, 
+                                        levels = c("Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"), ordered = TRUE)
+
+#use PNW color palette
+pal <- pnw_palette("Moth",12)
+
+# Plot with Studio Ghibli color palette
+oogen.size.month <- mean_size_month %>% 
+  ggplot(aes(x = abbreviated_timepoint, y = mean_size)) +
+  geom_col() +
+  geom_errorbar(aes(ymin = mean_size - std_error, ymax = mean_size + std_error), width = 0.2, color = "black") +  # Add error bars
+  #scale_fill_manual(values=pal)  + #specify PNW colors
+  theme_classic() +
+  ylab("Oocyte Diameter (microns)") +
+  xlab("Timepoint") +
+  theme(axis.text.x = element_text(angle = 0, size = 18),  # Increase size of x-axis text
+        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
+        legend.position = "none",  # Remove legend
+        text = element_text(size = 18)) +  # Increase size of all other text elements
+  ylab(expression("Mean oocyte diameter ("*mu*"m)")) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 410))
+
+oogen.size.month
+
+# save oogenesis size per month plots
+ggsave("histology/output/oogen.size.month.pdf", oogen.size.month , width = 13, height = 8)
+ggsave("histology/output/oogen.size.month.jpg", oogen.size.month , width = 13, height = 8)
+
+# select only month and temperature for temp data (environmental script must be run first)
+temperature <- mean_monthly_data %>% 
+  dplyr::select(month, mean_temp) 
+
+# Rename month to timepoint to overlay with plot
+temperature <- temperature %>%
+  rename(timepoint = month)
+
+# Calculate temp_adjustment
+temp_adjustment <- (29 - 26) / (max(temperature$mean_temp) - min(temperature$mean_temp))
+
+# Plot with temperature overlay and dual y-axis
+oogen.size.temp <- oogen.size.month + 
+  geom_line(data = temperature, aes(x = timepoint, y = (mean_temp - 26) * 384 / 3 + 26, color = "Temperature", group = 1)) +
+  geom_point(data = temperature, aes(x = timepoint, y = (mean_temp - 26) * 384 / 3 + 26, color = "Temperature")) +
+  scale_color_manual(values = c("Temperature" = "black")) +  # Adjust color if needed
+  theme(axis.text.x = element_text(angle = 0, size = 18),  # Increase size of x-axis text
+        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
+        legend.position = "none",  # Remove legend
+        text = element_text(size = 18)) +  # Increase size of all other text elements
+  scale_y_continuous(sec.axis = sec_axis(~ (. - 26) / 384 * 3 + 26, name = "Temperature (°C)"), expand = c(0, 0), limits = c(0, 410))
+
+oogen.size.temp
+
+# save oogenesis size plots with temperature overlayed
+ggsave("histology/output/oogen.size.temp.pdf", oogen.size.temp , width = 13, height = 8)
+ggsave("histology/output/oogen.size.temp.jpg", oogen.size.temp , width = 13, height = 8)
+
+
+
+```
+
+
+
+
+
+
+# Plot Spermatogenesis size plots
+```{r}
+
+# select for grand mean size dataframe
+spermato_size <- abundance %>%
+  dplyr::select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage) 
+
+spermato_size <- spermato_size %>%
+  group_by(colony_id, timepoint) %>%
+  mutate(count = n()) %>%
+  ungroup()
+
+# Reorder the levels of the 'timepoint' variable from December to October
+spermato_size$timepoint <- factor(spermato_size$timepoint, 
                                                  levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
                                                  ordered = TRUE)
 
@@ -133,9 +277,11 @@ oogen.size.plot <- mean_size %>%
   theme_bw() +
   ylab("Oocyte Diameter (microns)") +
   xlab("Colony ID") +
-  theme(axis.text.x = element_text(angle = 90),
-        legend.position = "top",  # Move legend to top
-        legend.title = element_blank()) +  
+  theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
+        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
+        legend.position = "top",
+        legend.title = element_blank(),
+        text = element_text(size = 18)) +  # Increase size of all other text elements
   ylab(expression("Mean oocyte diameter ("*mu*"m)")) +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 400)) + # Ensure the y-axis starts at 0
   guides(fill = guide_legend(ncol = length(unique(oogen_size$Stage)), byrow = TRUE))  # Set ncol and byrow for the legend # Remove legend titles
@@ -144,17 +290,21 @@ oogen.size.plot
 
 # Add count value on the x-axis
 oogen.size.plot2 <- oogen.size.plot +
-  geom_text(aes(x = replicate_id, y = 0, label = count), vjust = -0.5, size = 3, color = "black")
+  geom_text(aes(x = replicate_id, y = 0, label = count), vjust = -0.5, size = 5, color = "black")
 
 oogen.size.plot2
 
+# save oogenesis size plots
+ggsave("histology/output/oogenesis_size.pdf", oogen.size.plot2 , width = 13, height = 8)
+ggsave("histology/output/oogenesis_size.jpg", oogen.size.plot2 , width = 13, height = 8)
+
+
 ```
+
 
 # Arrange and save size plots
 ```{r}
 # save oogenesis plot
-ggsave("histology/output/oogenesis_size.pdf", oogen.size.plot2 , width = 10, height = 6)
-ggsave("histology/output/oogenesis_size.jpg", oogen.size.plot2 , width = 10, height = 6)
 
 #plots <- grid.arrange(oogen, spermato, nrow = 2)
 

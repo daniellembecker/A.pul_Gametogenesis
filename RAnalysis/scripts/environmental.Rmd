@@ -252,7 +252,7 @@ mean_light_per_month <- light.data %>%
 light.month <- ggplot(mean_light_per_month, aes(x = as.numeric(month), y = mean_light)) +
   geom_point(size = 3, color = "black") +
   geom_line(color = "black") +  # Specify the color for the line
-  ylab("Mean Sea Surface Temperature (°C)") +
+  ylab(expression("Mean Light Intensity " * (mu*mol~m^{-2}~s^{-1}))) +
   xlab("Month") +
   theme_classic() +
   scale_x_continuous(breaks = 1:12, labels = month.abb) + # Treat month as continuous
@@ -269,18 +269,7 @@ ggsave("RAnalysis/output/environmental/mean.light.month.jpg", light.month , widt
 # Make a commbined plot of light and temperature
 
 ```{r}
-# Combine light and temperature data
-
-# rename date column to Date in mean_temp_per_day
-#mean_temp_per_day <- mean_temp_per_day %>%
- # rename(Date = date)
-
-# make combined data file
-#combined_data <- full_join(mean_light_per_day, mean_temp_per_day, by = "Date")
-
-#make combined data by month
-# Assuming 'mean_light_per_month' and 'mean_temp_per_month' are your data frames with mean values per month for light intensity and temperature, respectively
-
+# Combine light and temperature data dual axes
 # Joining the data frames
 mean_monthly_data <- full_join(mean_light_per_month, mean_temp_per_month, by = "month")
 
@@ -288,24 +277,31 @@ mean_monthly_data <- full_join(mean_light_per_month, mean_temp_per_month, by = "
 mean_monthly_data_light <- mean_monthly_data[!is.na(mean_monthly_data$mean_light), ]
 
 # Plotting code
-ggplot(mean_monthly_data, aes(x = month)) +
+light.temp <- ggplot(mean_monthly_data, aes(x = month)) +
   geom_point(aes(y = mean_temp, color = "Temperature", group = 1), size = 3) +  # Add points for temperature
   geom_line(aes(y = mean_temp, color = "Temperature", group = 1)) +  # Add lines for temperature
   geom_point(aes(y = (mean_light - 2000) / 833 + 26, color = "Light Intensity", group = 1), size = 3) +  # Add points for light intensity
   geom_line(aes(y = (mean_light - 2000) / 833 + 26, color = "Light Intensity", group = 1)) +  # Add lines for light intensity
   scale_y_continuous(
-    sec.axis = sec_axis(~ (. - 26) * 833 + 2000, name = "Light Intensity") , name = "Mean Sea Surface Temperature (°C)",
+    sec.axis = sec_axis(~ (. - 26) * 833 + 2000, name = expression("Mean Light Intensity " * (mu*mol~m^{-2}~s^{-1}))), name = "Mean Sea Surface Temperature (°C)",
     limits = c(26, 29)) + # Set limits for the primary y-axis)) 
   scale_color_manual(values = c("Temperature" = "black", "Light Intensity" = "grey")) +  # Set colors
   labs(x = "Month", y = NULL) +
   theme_classic() +
+  labs(color = "Environmental Data") +
   theme(
-    axis.title.y = element_text(color = "black", size = 13),
-    axis.title.y.right = element_text(color = "grey", size = 13),
-    axis.text.y.right = element_text(color = "grey", size = 13)
-  )
+    axis.title.y = element_text(color = "black", size = 18),
+    axis.text.y = element_text(color = "black", size = 18),
+    axis.title.x = element_text(color = "black", size = 18),
+    axis.text.x = element_text(color = "black", size = 18),
+    axis.title.y.right = element_text(color = "darkgrey", size = 18),
+    axis.text.y.right = element_text(color = "darkgrey", size = 18))
 
+light.temp
 
+# save mean temp per month plot
+ggsave("RAnalysis/output/environmental/mean.light.temp.pdf", light.temp , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/mean.light.temp.jpg", light.temp , width = 10, height = 6)
 
 
 ```
