@@ -101,3 +101,35 @@ ggsave(filename="RAnalysis/output/HOBO/20240129_light_logger_plot.png", plot=lig
 
 ```
 
+# plot light mean light per month
+```{r}
+
+# Calculate mean sea surface temperature per month
+light.data$month <- factor(month(light.data$DateTime), levels = 1:12, labels = month.abb)  # Extract month from date as factor
+
+#group data by month and summarise for mean temp per month
+mean_light_per_month <- light.data %>%
+  group_by(month) %>%
+  summarise(mean_light = mean(calibrated, na.rm = TRUE)) %>%
+  arrange(match(month, month.abb))  # Sort the data by month in ascending order
+
+# Plot mean sea surface temperature per month as a dot and line plot
+light.month <- ggplot(mean_light_per_month, aes(x = as.numeric(month), y = mean_light)) +
+  geom_point(size = 3, color = "black") +
+  geom_line(color = "black") +  # Specify the color for the line
+  ylab("Mean Sea Surface Temperature (°C)") +
+  xlab("Month") +
+  theme_classic() +
+  scale_x_continuous(breaks = 1:12, labels = month.abb) + # Treat month as continuous
+  ylim(NA, 4500)  # Adjust the y-axis limits as needed
+
+light.month
+
+# save mean temp per month plot
+ggsave("RAnalysis/output/HOBO/mean.light.month.pdf", light.month , width = 10, height = 6)
+ggsave("RAnalysis/output/HOBO/mean.light.month.jpg", light.month , width = 10, height = 6)
+
+
+```
+
+

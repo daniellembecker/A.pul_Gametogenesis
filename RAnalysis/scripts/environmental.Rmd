@@ -1,7 +1,7 @@
 ---
-title: "HOBO_temp_processing"
+title: "environmental_processing"
 author: "daniellembecker"
-date: "4/5/2022"
+date: "2024-04-01"
 output: html_document
 ---
 
@@ -9,8 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##Processing temperature data for from HOBO loggers out at Mahana from February-April
-
+# Processing all environmental data collected from Mahana site in Moorea, French Polynesia (continuous light and temperature data) from ~January till November 2022
 
 ##Install packages
 # load packages
@@ -25,8 +24,10 @@ library("lubridate")
 library('tidyverse')
 library('lubridate')
 library('scales')
+
 ```
 
+##Processing temperature data for from HOBO temperature loggers out at Mahana from January to November
 
 #load temp data
 
@@ -158,6 +159,110 @@ ggsave("RAnalysis/output/HOBO/mean.temp.month.jpg", temp.month , width = 10, hei
 
 ```
 
+
+##Processing continuous light data for from Odyssey light loggers out at Mahana from March - October
+
+#load light data
+
+```{r}
+odyssey.1 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15640_001_003.csv")
+odyssey.2 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15641_001_003.csv")
+
 ```
 
+
+```{r}
+odyssey.1 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15640_001_003.csv")
+odyssey.2 <- read.csv("RAnalysis/data/HOBO/odyssey_light_loggers/15641_001_003.csv")
+
+```
+
+#bind all data sets together into one data frame
+
+```{r}
+light.data <- rbind(odyssey.1, odyssey.2)
+```
+
+
+#remove any NA's from the data frame
+```{r}
+light.data <- na.omit(light.data)
+
+view(light.data)
+```
+
+
+```{r}
+# Combine Date and Time columns into a new column named DateTime
+light.data$DateTime <- with(light.data, {
+  dmy_hms(paste(date, time), truncated = 2)  # truncated = 2 allows for two-digit years
+})
+
+# Separate date and time from the "date.temp" column
+light.data.sep <- light.data %>%
+  separate(DateTime, into = c("Date", "Time"), sep = " ")
+
+# Assuming your "Date" column is in a character format
+light.data.sep$Date <- as.Date(light.data.sep$Date, format = "%Y-%m-%d")
+
+# Group by Date and calculate the mean temperature for each day
+mean_light_per_day <- light.data.sep %>%
+  group_by(Date) %>%
+  summarise(mean_light = mean(calibrated))
+
+```
+
+```{r}
+#compare  light across timeseries
+
+light.plot <- mean_light_per_day %>%
+  ggplot(aes(x = Date, y = mean_light)) +
+  geom_line() + 
+  geom_point() +
+  scale_x_date(date_breaks = "4 days", date_labels = "%m-%d") +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 90, size = 16),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 16)) +
+  xlab("Date") +
+  ylab(expression(atop("Light Intensity", (mu*mol~m^{-2}~s^{-1})))); light.plot
+
+
+ggsave(filename="RAnalysis/output/HOBO/20240129_light_logger_plot.pdf", plot=light.plot, width=30, height=10, units="in")
+
+ggsave(filename="RAnalysis/output/HOBO/20240129_light_logger_plot.png", plot=light.plot, width=20, height=10, units="in")
+
+```
+
+# plot light mean light per month
+```{r}
+
+# Calculate mean sea surface temperature per month
+light.data$month <- factor(month(light.data$DateTime), levels = 1:12, labels = month.abb)  # Extract month from date as factor
+
+#group data by month and summarise for mean temp per month
+mean_light_per_month <- light.data %>%
+  group_by(month) %>%
+  summarise(mean_light = mean(calibrated, na.rm = TRUE)) %>%
+  arrange(match(month, month.abb))  # Sort the data by month in ascending order
+
+# Plot mean sea surface temperature per month as a dot and line plot
+light.month <- ggplot(mean_light_per_month, aes(x = as.numeric(month), y = mean_light)) +
+  geom_point(size = 3, color = "black") +
+  geom_line(color = "black") +  # Specify the color for the line
+  ylab("Mean Sea Surface Temperature (°C)") +
+  xlab("Month") +
+  theme_classic() +
+  scale_x_continuous(breaks = 1:12, labels = month.abb) + # Treat month as continuous
+  ylim(NA, 4500)  # Adjust the y-axis limits as needed
+
+light.month
+
+# save mean temp per month plot
+ggsave("RAnalysis/output/HOBO/mean.light.month.pdf", light.month , width = 10, height = 6)
+ggsave("RAnalysis/output/HOBO/mean.light.month.jpg", .month , width = 10, height = 6)
+
+
+```
 
