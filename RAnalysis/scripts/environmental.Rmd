@@ -291,11 +291,11 @@ mean_monthly_data_light <- mean_monthly_data[!is.na(mean_monthly_data$mean_light
 ggplot(mean_monthly_data, aes(x = month)) +
   geom_point(aes(y = mean_temp, color = "Temperature", group = 1), size = 3) +  # Add points for temperature
   geom_line(aes(y = mean_temp, color = "Temperature", group = 1)) +  # Add lines for temperature
-  geom_point(aes(y = mean_light / 120, color = "Light Intensity", group = 1), size = 3) +  # Add points for light intensity
-  geom_line(aes(y = mean_light / 120, color = "Light Intensity", group = 1)) +  # Add lines for light intensity
+  geom_point(aes(y = mean_light / 250 + 18, color = "Light Intensity", group = 1), size = 3) +  # Add points for light intensity
+  geom_line(aes(y = mean_light  / 250 + 18, color = "Light Intensity", group = 1)) +  # Add lines for light intensity
   scale_y_continuous(
-    sec.axis = sec_axis(~ . * 120, name = "Light Intensity") , 
-    limits = c(12, 29)) + # Set limits for the primary y-axis)) 
+    sec.axis = sec_axis(~ . * 250, name = "Light Intensity") , name = "Mean Sea Surface Temperature (°C)",
+    limits = c(26, 29)) + # Set limits for the primary y-axis)) 
   scale_color_manual(values = c("Temperature" = "black", "Light Intensity" = "grey")) +  # Set colors
   labs(x = "Month", y = NULL) +
   theme_classic() +
