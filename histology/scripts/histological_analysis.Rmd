@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library("tidyverse")
 library("gridExtra")
+library()
 ```
 
 ## Load data & select specific columns 
@@ -52,8 +53,7 @@ oogen_df_relative_abundance$timepoint <- factor(oogen_df_relative_abundance$time
                                                  levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
                                                  ordered = TRUE)
 
-
-# Plot with reordered months and unique grand_tots on x-axis
+# Plot without geom_text for each stacked plot
 oogen <- oogen_df_relative_abundance %>% 
   ggplot(aes(x = replicate_id, y = freq, fill = Stage)) +
   geom_col() +
@@ -61,14 +61,17 @@ oogen <- oogen_df_relative_abundance %>%
   theme_bw() +
   ylab("Proportion of Oocytes") +
   xlab("Colony ID") +
-  theme(axis.text.x = element_text(angle = 90),
-        legend.position = "top",  # Move legend to top
-        legend.title = element_blank()) +  
-  scale_y_continuous(expand = c(0, 0))  + # Ensure the y-axis starts at 0
-  guides(color = guide_legend(ncol = length(unique(oogen_df_relative_abundance$Stage)), byrow = TRUE), 
-         fill = guide_legend(ncol = length(unique(oogen_df_relative_abundance$Stage)), byrow = TRUE))  # Set ncol and byrow for the legend # Remove legend titles
+  theme(axis.text.x = element_text(angle = 90),legend.position = "top",legend.title = element_blank()) +  
+  scale_y_continuous(expand = c(0, 0)) +
+  guides(color = guide_legend(ncol = length(unique(oogen_df_relative_abundance$Stage)), byrow = TRUE), fill = guide_legend(ncol = length(unique(oogen_df_relative_abundance$Stage)), byrow = TRUE))
 
 oogen
+
+# Add grand_tots value on the x-axis
+oogen2 <- oogen +
+  geom_text(aes(x = replicate_id, y = 0, label = grand_tots), vjust = -0.5, size = 3, color = "black")
+
+oogen2
 
 
 ```
@@ -92,8 +95,8 @@ spermato
 # Arrange and save abundance plots
 ```{r}
 # save oogenesis plot
-ggsave("histology/output/oogenesis_abundance.pdf", oogen , width = 10, height = 6)
-ggsave("histology/output/oogenesis_abundance.jpg", oogen , width = 10, height = 6)
+ggsave("histology/output/oogenesis_abundance.pdf", oogen2 , width = 10, height = 6)
+ggsave("histology/output/oogenesis_abundance.jpg", oogen2 , width = 10, height = 6)
 
 #plots <- grid.arrange(oogen, spermato, nrow = 2)
 
@@ -105,17 +108,21 @@ ggsave("histology/output/oogenesis_abundance.jpg", oogen , width = 10, height = 
 
 # select for grand mean size dataframe
 oogen_size <- abundance %>%
-  select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage)  # Selecting 'replicate_id' and 'freq' columns
+  dplyr::select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage) 
+
+oogen_size <- oogen_size %>%
+  group_by(colony_id, timepoint) %>%
+  mutate(count = n()) %>%
+  ungroup()
 
 # Reorder the levels of the 'timepoint' variable from December to October
 oogen_size$timepoint <- factor(oogen_size$timepoint, 
                                                  levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
                                                  ordered = TRUE)
 
-
 # Calculate mean oocyte size per month
 mean_size <- oogen_size %>%
-  group_by(timepoint, replicate_id) %>%
+  group_by(timepoint, replicate_id, count) %>%
   summarise(mean_size = mean(geometric.mean, na.rm = TRUE))
 
 # Plot with reordered months and size
@@ -129,21 +136,25 @@ oogen.size.plot <- mean_size %>%
   theme(axis.text.x = element_text(angle = 90),
         legend.position = "top",  # Move legend to top
         legend.title = element_blank()) +  
-  ylab(expression("Oocyte diameter ("*mu*"m)")) +
-  scale_y_continuous(expand = c(0, 0))  + # Ensure the y-axis starts at 0
+  ylab(expression("Mean oocyte diameter ("*mu*"m)")) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 400)) + # Ensure the y-axis starts at 0
   guides(fill = guide_legend(ncol = length(unique(oogen_size$Stage)), byrow = TRUE))  # Set ncol and byrow for the legend # Remove legend titles
 
 oogen.size.plot
 
+# Add count value on the x-axis
+oogen.size.plot2 <- oogen.size.plot +
+  geom_text(aes(x = replicate_id, y = 0, label = count), vjust = -0.5, size = 3, color = "black")
 
+oogen.size.plot2
 
 ```
 
 # Arrange and save size plots
 ```{r}
 # save oogenesis plot
-ggsave("histology/output/oogenesis_size.pdf", oogen.size.plot , width = 10, height = 6)
-ggsave("histology/output/oogenesis_size.jpg", oogen.size.plot , width = 10, height = 6)
+ggsave("histology/output/oogenesis_size.pdf", oogen.size.plot2 , width = 10, height = 6)
+ggsave("histology/output/oogenesis_size.jpg", oogen.size.plot2 , width = 10, height = 6)
 
 #plots <- grid.arrange(oogen, spermato, nrow = 2)
 
