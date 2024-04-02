@@ -98,27 +98,48 @@ Plot univariate response plots and then generate panel of all plots at the end o
 View by treatment and timepoint.
 ```{r}
 
-# Fit a mixed-effects model with 'patch' as a random effect
-model <- lmer(cells.cm2 ~ timepoint + (1|patch), data = master)
+# Check for normality
+qqnorm(master$cells.cm2)
 
-# Perform ANOVA
-anova_results <- Anova(model, type = "II")
+# Fit a mixed-effects model with 'patch' as a random effect
+model.sym <- lmer(cells.cm2 ~ timepoint + (1|patch), data = master)
+
+# Get the summary of the model
+summary(model.sym)
+
+# Perform Type III ANOVA
+anova_result <- Anova(model.sym, type = 3)
 
 # Post-hoc pairwise comparisons (optional)
-pairwise_results <- emmeans(model, pairwise ~ timepoint, adjust = "tukey")
-
+pairwise_results.sym <- emmeans(model.sym, pairwise ~ timepoint, adjust = "tukey")
 
 # Extract pairwise comparisons
-pairwise_comparisons <- pairs(pairwise_results)
+pairwise_comparisons.sym <- pairs(pairwise_results.sym)
 
 # Filter significant comparisons
-significant_comparisons <- summary(pairwise_comparisons, test = "adjusted", by = NULL, infer = TRUE)
+significant_comparisons.sym <- summary(pairwise_comparisons.sym, test = "adjusted", by = NULL, infer = TRUE)
 
 # Extract significant comparisons
-significant_contrasts <- subset(significant_comparisons, p.value < 0.05)
+significant_contrasts.sym <- subset(significant_comparisons.sym, p.value < 0.05)
+
+# remove outlier data
+
+# Define the outlier value
+outlier_value <- 2430445.8
+
+# Remove the outlier value from the cells.cm2 column
+filtered_sym <- master[round(master$cells.cm2, digits = 1) != round(outlier_value, digits = 1), ]
+
+# Create a data frame with significant timepoints
+significant_timepoints <- c("AUG", "FEB", "JUL", "MAR", "MAY", "APR")
+
+
+# Get the maximum value of cells.cm2
+max_cells_cm2 <- max(master$cells.cm2, na.rm = TRUE)  # Make sure to handle any missing values
+
 
 # Create the plot
-symbplot_cm2 <- master %>%
+symbplot_cm2 <- filtered_sym %>%
   filter(!is.na(cells.cm2)) %>%
   filter(!is.na(timepoint)) %>%
   select(colony_id, timepoint, cells.cm2) %>%
@@ -126,23 +147,126 @@ symbplot_cm2 <- master %>%
   ggplot(., aes(x = timepoint, y = cells.cm2, fill = timepoint)) +
   geom_boxplot(color = "black", fill = "white", alpha = 0.2) +
   geom_point(pch = 21, size = 2, position = position_jitterdodge(0.2)) +
+  geom_text(data = data.frame(timepoint = significant_timepoints), aes(label = ifelse(timepoint == "MAY", "*", "***")), x = significant_timepoints, y = 0.99 * max_cells_cm2, vjust = -0.5, size = ifelse(significant_timepoints == "MAY", 14, 14), color = "black") +  # Add significance indicators
   scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
   xlab("") + 
   ylab(expression(bold(paste("Symbiont Cells cm"^-2)))) +
   theme_classic() + 
-  theme(legend.position = "none",
-        axis.title = element_text(face = "bold", size = 20),
-        axis.text = element_text(size = 12, color = "black"), 
-        strip.text.x = element_text(face = "italic", size = 12))
+    theme(legend.position = "none",
+      axis.title=element_text(face="bold", size=60),
+      axis.text=element_text(size=40, color="black"), 
+      strip.text.x=element_text(face="italic", size=40)); symbplot_cm2
 
-# Add significance stars
-symbplot_cm2 +
-  geom_signif(data = significant_contrasts, 
-              aes(x = timepoint, y = ymax + 5, annotations = as.character(p.value)), 
-              inherit.aes = FALSE,
-              manual = TRUE,
-              step_increase = 0.1,
-              vjust = -0.5)
+
+
+```
+
+
+### Plot: CHL-a
+
+View by treatment and timepoint.   
+```{r}
+
+# Check for normality
+qqnorm(master$chla.ug.cm2)
+
+# Fit a mixed-effects model with 'patch' as a random effect
+model.chla <- lmer(chla.ug.cm2 ~ timepoint + (1|patch), data = master)
+
+# Get the summary of the model
+summary(model.chla)
+
+# Perform Type III ANOVA
+anova_result <- Anova(model.chla, type = 3)
+
+# Post-hoc pairwise comparisons (optional)
+pairwise_results.chla <- emmeans(model.chla, pairwise ~ timepoint, adjust = "tukey")
+
+# Extract pairwise comparisons
+pairwise_comparisons.chla <- pairs(pairwise_results.chla)
+
+# Filter significant comparisons
+significant_comparisons.chla <- summary(pairwise_comparisons.chla, test = "adjusted", by = NULL, infer = TRUE)
+
+# Extract significant comparisons
+significant_contrasts.chla <- subset(significant_comparisons.chla, p.value < 0.05)
+
+# Define a threshold for identifying outliers for the 'Value' column
+threshold <- 10  # For example, we consider values greater than 50 as outliers
+
+# Filter out values beyond the threshold for the 'Value' column
+filtered_master <- master[master$chla.ug.cm2 <= threshold, ]
+
+# make chla plot
+chla_cm2 <- filtered_master %>%
+  filter(!is.na(chla.ug.cm2)) %>%
+  filter(!is.na(timepoint))%>%
+  select(colony_id, timepoint, chla.ug.cm2)%>%
+  
+  ggplot(., aes(x = timepoint, y = chla.ug.cm2, fill = timepoint)) +
+    geom_boxplot(color="black", fill="white", alpha=0.2) +
+    geom_point(pch = 21, size=2, position = position_jitterdodge(0.2)) +
+    ylim(0, 12)+
+  scale_x_discrete(limits = c("JAN","FEB","MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
+    xlab("") + 
+    ylab(expression(bold(paste("Chlorophyll a (", mu, "g cm"^-2, ")"))))+
+    theme_classic() + 
+    scale_y_continuous(limits = c(0, 8))  + # Adjust limits as needed
+    theme(legend.position = "none",
+      axis.title=element_text(face="bold", size=60),
+      axis.text=element_text(size=40, color="black"), 
+      strip.text.x=element_text(face="italic", size=40)); chla_cm2
+
+```
+
+### Plot: CHL-c
+
+View by treatment and timepoint.   
+```{r}
+
+# Check for normality
+qqnorm(master$chlc2.ug.cm2)
+
+# Fit a mixed-effects model with 'patch' as a random effect
+model.chlc <- lmer(chlc2.ug.cm2 ~ timepoint + (1|patch), data = master)
+
+# Get the summary of the model
+summary(model.chlc)
+
+# Perform Type III ANOVA
+anova_result <- Anova(model.chlc, type = 3)
+
+# Post-hoc pairwise comparisons (optional)
+pairwise_results.chlc <- emmeans(model.chlc, pairwise ~ timepoint, adjust = "tukey")
+
+# Extract pairwise comparisons
+pairwise_comparisons.chlc <- pairs(pairwise_results.chlc)
+
+# Filter significant comparisons
+significant_comparisons.chlc <- summary(pairwise_comparisons.chlc, test = "adjusted", by = NULL, infer = TRUE)
+
+# Extract significant comparisons
+significant_contrasts.chlc <- subset(significant_comparisons.chlc, p.value < 0.05)
+
+# Make chlc plot
+chlc_prot_cm2 <- master %>%
+  filter(!is.na(chlc2.ug.cm2)) %>%
+  filter(!is.na(timepoint))%>%
+  select(colony_id, timepoint, chlc2.ug.cm2)%>%
+  
+  ggplot(., aes(x = timepoint, y = chlc2.ug.cm2, fill = timepoint)) +
+    geom_boxplot(color="black", fill="white", alpha=0.2) +
+    geom_point(pch = 21, size=2, position = position_jitterdodge(0.2)) +
+    ylim(0, 12)+
+  scale_x_discrete(limits = c("JAN","FEB","MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
+    xlab("") + 
+    ylab(expression(bold(paste("Chlorophyll c2 (", mu, "g cm"^-2, ")"))))+
+    theme_classic() + 
+    scale_y_continuous(limits = c(0, 4.5))  + # Adjust limits as needed
+    theme(legend.position = "none",
+      axis.title=element_text(face="bold", size=60),
+      axis.text=element_text(size=40, color="black"), 
+      strip.text.x=element_text(face="italic", size=40)) ; chlc_prot_cm2
 
 
 ```
@@ -151,7 +275,33 @@ symbplot_cm2 +
 
 View by treatment and timepoint.    
 ```{r}
-host_prot_cm2<-master %>%
+
+# check for normality
+qqnorm(master$host_prot_mg.cm2)
+
+# Fit a mixed-effects model with 'patch' as a random effect
+model.host.prot <- lmer(host_prot_mg.cm2 ~ timepoint + (1|patch), data = master)
+
+# Get the summary of the model
+summary(model.host.prot)
+
+# Perform Type III ANOVA
+anova_result <- Anova(model.host.prot, type = 3)
+
+# Post-hoc pairwise comparisons (optional)
+pairwise_results.host.prot <- emmeans(model.host.prot, pairwise ~ timepoint, adjust = "tukey")
+
+# Extract pairwise comparisons
+pairwise_comparisons.host.prot <- pairs(pairwise_results.host.prot)
+
+# Filter significant comparisons
+significant_comparisons.host.prot <- summary(pairwise_comparisons.host.prot, test = "adjusted", by = NULL, infer = TRUE)
+
+# Extract significant comparisons
+significant_contrasts.host.prot <- subset(significant_comparisons.host.prot, p.value < 0.05)
+
+# Make plot for host protein
+host_prot_cm2 <- master %>%
   filter(!is.na(host_prot_mg.cm2)) %>%
   filter(!is.na(timepoint))%>%
   select(colony_id, timepoint, host_prot_mg.cm2)%>%
@@ -164,33 +314,47 @@ host_prot_cm2<-master %>%
     xlab("") + 
     ylab(expression(bold(paste("Host Protein ( mg cm"^-2, ")"))))+
     theme_classic() + 
+    scale_y_continuous(limits = c(0, 2.5))  + # Adjust limits as needed
     theme(legend.position = "none",
       axis.title=element_text(face="bold", size=60),
       axis.text=element_text(size=40, color="black"), 
-      strip.text.x=element_text(face="italic", size=40))
+      strip.text.x=element_text(face="italic", size=40)); host_prot_cm2
 
 
-# Fit a linear model (ANOVA)
-model <- aov(host_prot_mg.cm2 ~ timepoint, data = master)
-
-# Perform ANOVA
-anova_results <- Anova(model, type = "II")
-
-# Display the ANOVA table
-print(anova_results)
-
-# Post-hoc pairwise comparisons (optional)
-pairwise_results <- lsmeans(model, pairwise ~ timepoint, adjust = "tukey")
-
-# Display the pairwise comparison results
-print(pairwise_results)
 ```
+
 
 ### Plot: Holobiont protein  
 
 View by treatment and timepoint.   
 ```{r}
-holobiont_prot_cm2<-master %>%
+
+# check for normality
+qqnorm(master$holobiont_prot_mg.cm2)
+
+# Fit a mixed-effects model with 'patch' as a random effect
+model.holo.prot <- lmer(holobiont_prot_mg.cm2 ~ timepoint + (1|patch), data = master)
+
+# Get the summary of the model
+summary(model.holo.prot)
+
+# Perform Type III ANOVA
+anova_result <- Anova(model.holo.prot, type = 3)
+
+# Post-hoc pairwise comparisons (optional)
+pairwise_results.holo.prot <- emmeans(model.holo.prot, pairwise ~ timepoint, adjust = "tukey")
+
+# Extract pairwise comparisons
+pairwise_comparisons.holo.prot <- pairs(pairwise_results.holo.prot)
+
+# Filter significant comparisons
+significant_comparisons.holo.prot <- summary(pairwise_comparisons.holo.prot, test = "adjusted", by = NULL, infer = TRUE)
+
+# Extract significant comparisons
+significant_contrasts.holo.prot <- subset(significant_comparisons.holo.prot, p.value < 0.05)
+
+# Make holobiont protein plot
+holobiont_prot_cm2 <- master %>%
   filter(!is.na(holobiont_prot_mg.cm2)) %>%
   filter(!is.na(timepoint))%>%
   select(colony_id, timepoint, holobiont_prot_mg.cm2)%>%
@@ -206,104 +370,10 @@ holobiont_prot_cm2<-master %>%
     theme(legend.position = "none",
       axis.title=element_text(face="bold", size=60),
       axis.text=element_text(size=40, color="black"), 
-      strip.text.x=element_text(face="italic", size=40))
+      strip.text.x=element_text(face="italic", size=40)); holobiont_prot_cm2
 
 
-# Fit a linear model (ANOVA)
-model <- aov(holobiont_prot_mg.cm2 ~ timepoint, data = master)
 
-# Perform ANOVA
-anova_results <- Anova(model, type = "II")
-
-# Display the ANOVA table
-print(anova_results)
-
-# Post-hoc pairwise comparisons (optional)
-pairwise_results <- lsmeans(model, pairwise ~ timepoint, adjust = "tukey")
-
-# Display the pairwise comparison results
-print(pairwise_results)
-
-
-```
-
-
-### Plot: CHL-a
-
-View by treatment and timepoint.   
-```{r}
-chla_cm2<-master %>%
-  filter(!is.na(chla.ug.cm2)) %>%
-  filter(!is.na(timepoint))%>%
-  select(colony_id, timepoint, chla.ug.cm2)%>%
-  
-  ggplot(., aes(x = timepoint, y = chla.ug.cm2, fill = timepoint)) +
-    geom_boxplot(color="black", fill="white", alpha=0.2) +
-    geom_point(pch = 21, size=2, position = position_jitterdodge(0.2)) +
-    ylim(0, 12)+
-  scale_x_discrete(limits = c("JAN","FEB","MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
-    xlab("") + 
-    ylab(expression(bold(paste("Chlorophyll a (", mu, "g cm"^-2, ")"))))+
-    theme_classic() + 
-    theme(legend.position = "none",
-      axis.title=element_text(face="bold", size=60),
-      axis.text=element_text(size=40, color="black"), 
-      strip.text.x=element_text(face="italic", size=40))
-
-
-# Fit a linear model (ANOVA)
-model <- aov(chla.ug.cm2 ~ timepoint, data = master)
-
-# Perform ANOVA
-anova_results <- Anova(model, type = "II")
-
-# Display the ANOVA table
-print(anova_results)
-
-# Post-hoc pairwise comparisons (optional)
-pairwise_results <- lsmeans(model, pairwise ~ timepoint, adjust = "tukey")
-
-# Display the pairwise comparison results
-print(pairwise_results)
-
-```
-
-### Plot: CHL-c
-
-View by treatment and timepoint.   
-```{r}
-chlc_prot_cm2<-master %>%
-  filter(!is.na(chlc2.ug.cm2)) %>%
-  filter(!is.na(timepoint))%>%
-  select(colony_id, timepoint, chlc2.ug.cm2)%>%
-  
-  ggplot(., aes(x = timepoint, y = chlc2.ug.cm2, fill = timepoint)) +
-    geom_boxplot(color="black", fill="white", alpha=0.2) +
-    geom_point(pch = 21, size=2, position = position_jitterdodge(0.2)) +
-    ylim(0, 12)+
-  scale_x_discrete(limits = c("JAN","FEB","MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
-    xlab("") + 
-    ylab(expression(bold(paste("Chlorophyll c2 (", mu, "g cm"^-2, ")"))))+
-    theme_classic() + 
-    theme(legend.position = "none",
-      axis.title=element_text(face="bold", size=60),
-      axis.text=element_text(size=40, color="black"), 
-      strip.text.x=element_text(face="italic", size=40))
-
-# Fit a linear model (ANOVA)
-model <- aov(chlc2.ug.cm2 ~ timepoint, data = master)
-
-# Perform ANOVA
-anova_results <- Anova(model, type = "II")
-
-# Display the ANOVA table
-print(anova_results)
-
-# Post-hoc pairwise comparisons (optional)
-pairwise_results <- lsmeans(model, pairwise ~ timepoint, adjust = "tukey")
-
-# Display the pairwise comparison results
-print(pairwise_results)
 ```
 
 
