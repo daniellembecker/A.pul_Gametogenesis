@@ -33,9 +33,9 @@ library('patchwork')
 #load temp data
 
 ```{r}
-mahana.temp.hobo.06 <- read.csv("RAnalysis/data/environmental/HOBO_temperature/Mahana_6.csv")
-mahana.temp.hobo.09 <- read.csv("RAnalysis/data/environmental/HOBO_temperature/Mahana_9.csv")
-mahana.temp.hobo.07 <- read.csv("RAnalysis/data/environmental/HOBO_temperature/20444028_Mahana_7.csv")
+mahana.temp.hobo.06 <- read.csv("RAnalysis/data/environmental/HOBO_temperature/20220415_Mahana_6.csv")
+mahana.temp.hobo.09 <- read.csv("RAnalysis/data/environmental/HOBO_temperature/20220415_Mahana_9.csv")
+mahana.temp.hobo.07 <- read.csv("RAnalysis/data/environmental/HOBO_temperature/20220415_Mahana_7.csv")
 mahana.temp.hobo.10 <- read.csv("RAnalysis/data/environmental/HOBO_temperature/20221114_Mahana_10.csv")
 mahana.temp.hobo.11 <- read.csv("RAnalysis/data/environmental/HOBO_temperature/20221114_Mahana_11.csv")
 mahana.temp.hobo.12 <- read.csv("RAnalysis/data/environmental/HOBO_temperature/20221114_Mahana_12.csv")
