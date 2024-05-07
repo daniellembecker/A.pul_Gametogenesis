@@ -99,7 +99,7 @@ spermato <- spermato_df_relative_abundance %>% ggplot(aes(x=colony_id, y=freq, g
   ylab("Proportion of Sperm")+
   theme(axis.text.x = element_text(angle = 90))
 
-spermato
+
 ```
 
 # Arrange and save abundance plots
