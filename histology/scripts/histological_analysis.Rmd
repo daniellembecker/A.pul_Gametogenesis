@@ -40,7 +40,7 @@ df_relative_abundance <- df_relative_abundance %>%
 df_relative_abundance$group <- paste0(df_relative_abundance$timepoint,"_", df_relative_abundance$colony_id)
 
 # convert the Stage column in the df_relative_abundance dataframe to a factor with specified levels
-df_relative_abundance$Stage <- factor(df_relative_abundance$Stage, levels = c("StageI","StageII","StageIII","StageIV", "StageV"))
+df_relative_abundance$Stage <- factor(df_relative_abundance$Stage, levels = c("Stage I","Stage II","Stage III","Stage IV", "Stage V"))
 
 ```
 
@@ -91,24 +91,43 @@ ggsave("histology/output/oogenesis_abundance.jpg", oogen2 , width = 13, height =
 spermato_df_relative_abundance <- df_relative_abundance %>%
   filter(!gonad.type=="oocyte")
 
-spermato <- spermato_df_relative_abundance %>% ggplot(aes(x=colony_id, y=freq, group=stage, color=stage, fill=stage)) +
-  geom_col()+
-  #geom_text(aes(label=grand.tots),color="black", size=1.5, vjust = 0.1)+
-  facet_wrap(c("site", "timepoint"), ncol=11)+
-  theme_bw()+
-  ylab("Proportion of Sperm")+
-  theme(axis.text.x = element_text(angle = 90))
+# Reorder the levels of the 'timepoint' variable from December to October
+spermato_df_relative_abundance$timepoint <- factor(spermato_df_relative_abundance$timepoint, 
+                                                 levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
+                                                 ordered = TRUE)
+
+# Plot without geom_text for each stacked plot
+spermato <- spermato_df_relative_abundance %>% 
+  ggplot(aes(x = replicate_id, y = freq, fill = Stage)) +
+  geom_col() +
+  facet_wrap(~ timepoint, ncol = 11) +
+  theme_bw() +
+  ylab("Proportion of Spermatocytes") +
+  xlab("Colony ID") +
+  theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
+        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
+        legend.position = "top",
+        legend.title = element_blank(),
+        text = element_text(size = 18)) +  # Increase size of all other text elements
+  scale_y_continuous(expand = c(0, 0)) +
+  guides(color = guide_legend(ncol = length(unique(spermato_df_relative_abundance$Stage)), byrow = TRUE), fill = guide_legend(ncol = length(unique(spermato_df_relative_abundance$Stage)), byrow = TRUE))
+
+spermato
+
+# Add grand_tots value on the x-axis
+spermato2 <- spermato +
+  geom_text(aes(x = replicate_id, y = 0, label = grand_tots), vjust = -0.5, size = 5, color = "black")
+
+spermato2
+
+# save oogenesis plot
+ggsave("histology/output/spermatogenesis_abundance.pdf", spermato2 , width = 13, height = 8)
+ggsave("histology/output/spermatogenesis_abundance.jpg", spermato2 , width = 13, height = 8)
+
 
 
 ```
 
-# Arrange and save abundance plots
-```{r}
-
-#plots <- grid.arrange(oogen, spermato, nrow = 2)
-
-
-```
 
 # Plot Oogenesis size by replicate 
 ```{r}
