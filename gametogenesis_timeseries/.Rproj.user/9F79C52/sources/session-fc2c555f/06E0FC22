@@ -1,0 +1,28 @@
+{
+    "id": "06E0FC22",
+    "path": "~/Desktop/Putnam_Lab/A.pul_Gametogenesis/gametogenesis_timeseries/January_2022/scripts/2_biomass.Rmd",
+    "project_path": "January_2022/scripts/2_biomass.Rmd",
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1715720928097.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "console",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "113,23",
+        "scrollLine": "99",
+        "working_dir": "project"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1715721444,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1715721444043,
+    "read_only": false,
+    "read_only_alternatives": []
+}
