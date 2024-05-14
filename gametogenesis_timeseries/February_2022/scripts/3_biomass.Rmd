@@ -24,19 +24,14 @@ library(plotrix)
 #Read in biomass data
 Data <- read.csv("data/1_biomass/1_biomass_data.csv")
 Data <- na.omit(Data)
-
-# Change POC-42 pan 221 from Sym to Host -- was recorded twice as Sym, assuming pan with m ore mass is host
-Data[Data$Pan.ID == 221, "partner"] <- "Host"
-# Remove pan 73 -- from lab notebook, material was stuck in pipet tip, and result is outlier
-Data[Data$Pan.ID == 73, ] <- NA
   
 # calculated mass per ml
-#different volumes for sym (4ml) and host (5ml)
-sym <- 4
-host <- 5
+#different volumes for sym (5ml) and host (4ml)
+sym <- 5
+host <- 4
 
 #Load tissue homogenate volume
-homog_vol <- read.csv("data/1_homogenate_vols/1_homogenate_vols.csv", header=TRUE)
+homog_vol <- read.csv("data/2_homogenate_vols/2_homogenate_vols.csv", header=TRUE)
 
 # Load Surface area data
 sa <- read.csv("output/1_surface_area.csv")
@@ -125,6 +120,3 @@ afdw %>%
 
 
 ```
-
-
- 
