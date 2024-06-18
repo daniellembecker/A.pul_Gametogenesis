@@ -94,17 +94,17 @@ ACR-421,Stage IV,261.401,255.534,258.4508525,oocyte,9,mahana,August,Rep1,ACR421_
 ACR-421,Stage IV,285.667,240.345,262.0279281,oocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
 ACR-421,Stage IV,314.332,223.81,265.2369599,oocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
 ACR-421,Stage II,24.638,20.576,22.51558323,spermatocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
-ACR-421,Stage II,30.976,21.418,25.75740608,spermatocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
-ACR-421,Stage II,38.221,20.998,28.32957038,spermatocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
-ACR-421,Stage II,40.223,25.786,32.20543864,spermatocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
+ACR-421,Stage III,30.976,21.418,25.75740608,spermatocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
+ACR-421,Stage III,38.221,20.998,28.32957038,spermatocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
+ACR-421,Stage III,40.223,25.786,32.20543864,spermatocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
 ACR-421,Stage III,56.443,30.998,41.82846057,spermatocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
 ACR-421,Stage III,55.786,32.444,42.54316613,spermatocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
 ACR-421,Stage III,50.112,34.776,41.74559752,spermatocyte,9,mahana,August,Rep1,ACR421_20220911,P4,"22,14",3.6525,microns,
 ACR-438,Stage II,31.443,20.334,25.2856078,spermatocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
-ACR-438,Stage II,40.332,20.876,29.01673365,spermatocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
-ACR-438,Stage II,39.887,25.443,31.85663104,spermatocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
+ACR-438,Stage III,40.332,20.876,29.01673365,spermatocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
+ACR-438,Stage III,39.887,25.443,31.85663104,spermatocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
 ACR-438,Stage II,36.443,15.443,23.72317957,spermatocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
-ACR-438,Stage II,56.774,20.111,33.7902636,spermatocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
+ACR-438,Stage III,56.774,20.111,33.7902636,spermatocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
 ACR-438,Stage III,59.878,27.543,40.61058672,spermatocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
 ACR-438,Stage III,239.095,125.834,173.4539715,oocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
 ACR-438,Stage III,183.819,168.479,175.9819346,oocyte,7,mahana,August,Rep2,ACR438_20220911,P5,"22,14",3.6525,microns,
@@ -224,9 +224,9 @@ ACR-449,Stage III,189.454,130.555,157.2709985,oocyte,9,mahana,July,Rep2,ACR449_2
 ACR-449,Stage III,190.443,132.223,158.685049,oocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
 ACR-449,Stage II,24.535,10.334,15.9230867,spermatocyte,9,mahana,July,Rep1,ACR449_20220725,P2,"22,14",3.6525,microns,
 ACR-449,Stage II,31.657,12.555,19.93623924,spermatocyte,9,mahana,July,Rep1,ACR449_20220725,P2,"22,14",3.6525,microns,
-ACR-449,Stage II,33.676,20.112,26.02482876,spermatocyte,9,mahana,July,Rep1,ACR449_20220725,P2,"22,14",3.6525,microns,
-ACR-449,Stage II,41.098,19.887,28.58873775,spermatocyte,9,mahana,July,Rep1,ACR449_20220725,P2,"22,14",3.6525,microns,
-ACR-449,Stage II,55.668,22.446,35.34860574,spermatocyte,9,mahana,July,Rep1,ACR449_20220725,P2,"22,14",3.6525,microns,
+ACR-449,Stage III,33.676,20.112,26.02482876,spermatocyte,9,mahana,July,Rep1,ACR449_20220725,P2,"22,14",3.6525,microns,
+ACR-449,Stage III,41.098,19.887,28.58873775,spermatocyte,9,mahana,July,Rep1,ACR449_20220725,P2,"22,14",3.6525,microns,
+ACR-449,Stage III,55.668,22.446,35.34860574,spermatocyte,9,mahana,July,Rep1,ACR449_20220725,P2,"22,14",3.6525,microns,
 ACR-423,Stage III,189.443,160.076,174.1415449,oocyte,8,mahana,July,Rep1,ACR423_20220725,P4,"22,14",3.6525,microns,
 ACR-423,Stage III,210.998,148.776,177.176292,oocyte,8,mahana,July,Rep1,ACR423_20220725,P4,"22,14",3.6525,microns,
 ACR-423,Stage III,222.914,142.311,178.1098376,oocyte,8,mahana,July,Rep1,ACR423_20220725,P4,"22,14",3.6525,microns,
@@ -269,11 +269,11 @@ ACR-449,Stage III,205.667,139.887,169.6176277,oocyte,9,mahana,July,Rep2,ACR449_2
 ACR-449,Stage III,58.776,33.478,44.35879764,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
 ACR-449,Stage III,60.123,30.333,42.70492898,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
 ACR-449,Stage III,68.444,29.765,45.13574703,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
-ACR-449,Stage III,89.223,45.676,63.83846605,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
-ACR-449,Stage III,90.334,46.787,65.01120563,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
-ACR-449,Stage III,91.322,39.875,60.34455029,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
-ACR-449,Stage III,90.763,30.222,52.37403351,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
-ACR-449,Stage III,88.786,41.232,60.50474652,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
+ACR-449,Stage IV,89.223,45.676,63.83846605,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
+ACR-449,Stage IV,90.334,46.787,65.01120563,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
+ACR-449,Stage IV,91.322,39.875,60.34455029,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
+ACR-449,Stage IV,90.763,30.222,52.37403351,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
+ACR-449,Stage IV,88.786,41.232,60.50474652,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
 ACR-449,Stage IV,99.909,50.443,70.99091271,spermatocyte,9,mahana,July,Rep2,ACR449_20220725,P2,"22,14",3.6525,microns,
 ACR-436,Stage I,10.456,2.456,5.067537469,spermatocyte,8,mahana,June,Rep1,ACR436_20220616,P3,14,3.6525,microns,
 ACR-436,Stage I,15.676,4.666,8.552439184,spermatocyte,8,mahana,June,Rep1,ACR436_20220616,P3,14,3.6525,microns,
@@ -309,8 +309,8 @@ ACR-436,Stage III,165.476,120.111,140.980452,oocyte,8,mahana,June,Rep3,ACR436_20
 ACR-436,Stage II,170.555,112.111,138.2790353,oocyte,8,mahana,June,Rep3,ACR436_20220616,P3,14,3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-436,Stage II,145.678,100.222,120.8310412,oocyte,8,mahana,June,Rep3,ACR436_20220616,P3,14,3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-436,Stage III,198.334,130.127,160.6505786,oocyte,8,mahana,June,Rep3,ACR436_20220616,P3,14,3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-436,Stage II,12.343,6.787,9.152701295,spermatocyte,8,mahana,June,Rep1,ACR436_20220616,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-436,Stage II,15.444,6.777,10.23054192,spermatocyte,8,mahana,June,Rep1,ACR436_20220616,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-436,Stage I,12.343,6.787,9.152701295,spermatocyte,8,mahana,June,Rep1,ACR436_20220616,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-436,Stage I,15.444,6.777,10.23054192,spermatocyte,8,mahana,June,Rep1,ACR436_20220616,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-431,Stage II,123.455,100.111,111.1719547,oocyte,7,mahana,June,Rep4,ACR431_20220616,,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-431,Stage II,121.332,80.334,98.72732594,oocyte,7,mahana,June,Rep4,ACR431_20220616,,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-446,Stage III,220.765,176.567,197.4330615,oocyte,8,mahana,June,Rep1,ACR446_20220616,P4,"22,14",3.6525,microns,
@@ -413,7 +413,7 @@ ACR-431,Stage III,180.998,160.778,170.5886762,oocyte,8,mahana,May,Rep2,ACR431_20
 ACR-431,Stage III,176.554,140.998,157.7775678,oocyte,8,mahana,May,Rep2,ACR431_20220515,P4,"22,14",3.6525,microns,
 ACR-431,Stage III,177.776,130.887,152.5403793,oocyte,8,mahana,May,Rep2,ACR431_20220515,P4,"22,14",3.6525,microns,
 ACR-417,Stage II,161.224,119.355,138.7187461,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-459,Stage II,51.323,41.866,46.3539504,spermatocyte,7,mahana,October,Rep1,ACR459_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-459,Stage III,51.323,41.866,46.3539504,spermatocyte,7,mahana,October,Rep1,ACR459_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-417,Stage III,198.345,150.234,172.6214434,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-417,Stage III,286.234,165.434,217.6070669,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-417,Stage III,291.611,165.814,219.8935796,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
@@ -422,7 +422,7 @@ ACR-417,Stage III,291.345,175.677,226.2357522,oocyte,8,mahana,October,Rep1,ACR41
 ACR-417,Stage III,287.334,186.454,231.461819,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-417,Stage III,279.443,198.332,235.4198145,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-417,Stage III,284.69,198.73,237.8580327,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-459,Stage III,99.978,41.221,64.19651967,spermatocyte,7,mahana,October,Rep1,ACR459_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-459,Stage IV,99.978,41.221,64.19651967,spermatocyte,7,mahana,October,Rep1,ACR459_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-459,Stage IV,93.641,57.918,73.64441213,spermatocyte,7,mahana,October,Rep1,ACR459_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-459,Stage IV,98.767,59.321,76.5438254,spermatocyte,7,mahana,October,Rep1,ACR459_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-459,Stage V,429.716,225.967,311.6113531,oocyte,7,mahana,October,Rep2,ACR459_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
@@ -443,8 +443,8 @@ ACR-459,Stage V,100.633,83.265,91.53800711,spermatocyte,7,mahana,October,Rep1,AC
 ACR-459,Stage V,112.332,66.543,86.45755187,spermatocyte,7,mahana,October,Rep1,ACR459_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-420,Stage III,287.345,230.333,257.2645251,oocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-420,Stage III,290.888,245.654,267.3159194,oocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-420,Stage III,69.778,61.332,65.41883747,spermatocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-420,Stage III,68.775,50.112,58.70649709,spermatocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-420,Stage IV,69.778,61.332,65.41883747,spermatocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-420,Stage IV,68.775,50.112,58.70649709,spermatocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-458,Stage III,298.776,190.443,238.5367849,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
 ACR-458,Stage III,343.776,170.889,242.3789118,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
 ACR-458,Stage III,298.331,154.292,214.5462343,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
@@ -452,22 +452,22 @@ ACR-458,Stage III,356.778,150.667,231.8505357,oocyte,10,mahana,September,Rep2,AC
 ACR-458,Stage III,370.889,143.221,230.475798,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
 ACR-458,Stage IV,380.667,151.332,240.014788,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
 ACR-458,Stage III,46.296,38.743,42.35145721,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,83.743,35.28,54.35488055,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,66.813,54.323,60.24518735,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,77.696,55.787,65.83636345,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,66.464,57.024,61.56332623,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,83.743,35.28,54.35488055,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,66.813,54.323,60.24518735,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,77.696,55.787,65.83636345,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,66.464,57.024,61.56332623,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
 ACR-458,Stage III,68.733,36.363,49.99338035,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,69.556,60.232,64.72632379,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,79.343,46.411,60.68268265,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,56.789,50.424,53.5119476,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,66.759,62.028,64.35003692,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,69.556,60.232,64.72632379,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,79.343,46.411,60.68268265,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,56.789,50.424,53.5119476,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,66.759,62.028,64.35003692,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
 ACR-458,Stage III,56.774,44.296,50.14839084,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,85.432,40.765,59.01385837,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,70.232,50.332,59.45516819,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,69.998,49.878,59.08773345,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,68.756,45.897,56.17556526,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,56.434,50.375,53.31850289,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,71.223,58.832,64.73168881,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,85.432,40.765,59.01385837,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,70.232,50.332,59.45516819,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,69.998,49.878,59.08773345,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,68.756,45.897,56.17556526,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,56.434,50.375,53.31850289,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,71.223,58.832,64.73168881,spermatocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
 ACR-420,Stage IV,298.777,250.123,273.3697122,oocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-420,Stage IV,290.343,260.445,274.9879682,oocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-420,Stage IV,283.989,280.999,282.4900441,oocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
@@ -558,21 +558,21 @@ ACR-430,Stage III,210.909,160.334,183.8909557,oocyte,6,mahana,July,Rep3,ACR430_2
 ACR-430,Stage III,210.334,150.677,178.0238639,oocyte,6,mahana,July,Rep3,ACR430_20220725,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-430,Stage III,209.112,130.988,165.5027572,oocyte,6,mahana,July,Rep3,ACR430_20220725,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-430,Stage III,200.989,120.334,155.5178778,oocyte,6,mahana,July,Rep3,ACR430_20220725,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-448,Stage III,82.726,62.424,71.86158796,spermatocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-448,Stage III,72.056,50.112,60.09051732,spermatocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-448,Stage II,60.543,20.987,35.64570018,spermatocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-448,Stage II,45.667,15.765,26.83170242,spermatocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-448,Stage III,68.334,30.762,45.84856059,spermatocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-448,Stage III,40.223,20.998,29.06204662,spermatocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-448,Stage II,45.667,12.433,23.8280887,spermatocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-448,Stage III,45.667,15.765,26.83170242,spermatocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-448,Stage II,139.305,130.282,134.7179795,oocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-448,Stage II,139.778,53.337,86.34430604,oocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-448,Stage II,133.249,82.1,104.5932259,oocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-448,Stage III,210.998,150.443,178.1661363,oocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-448,Stage III,200.998,114.232,151.526907,oocyte,7,mahana,July,Rep4,ACR448_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-451,Stage III,70.982,43.667,55.67379091,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-451,Stage II,69.554,20.876,38.10523985,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-451,Stage III,69.887,49.087,58.5708389,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-451,Stage II,61.223,21.987,36.68937313,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-451,Stage III,70.234,49.887,59.19259716,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-451,Stage II,63.444,19.878,35.51253063,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-451,Stage II,40.009,10.232,20.23294561,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-451,Stage III,41.887,20.876,29.57081352,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-451,Stage II,30.876,14.553,21.1976043,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-451,Stage III,61.223,21.987,36.68937313,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-451,Stage II,45.676,11.223,22.64115165,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-451,Stage III,63.444,19.878,35.51253063,spermatocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-451,Stage III,267.562,199.847,231.2389738,oocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-451,Stage III,227.675,140.331,178.7452389,oocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-451,Stage IV,287.366,230.735,257.4983379,oocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
@@ -583,10 +583,10 @@ ACR-451,Stage III,197.665,120.998,154.6514457,oocyte,7,mahana,July,Rep5,ACR451_2
 ACR-451,Stage III,187.665,140.998,162.6664983,oocyte,7,mahana,July,Rep5,ACR451_20220725,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-457,Stage II,14.514,10.842,12.54435283,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-457,Stage II,13.226,8.765,10.76688859,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-457,Stage II,15.678,5.098,8.940159059,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-457,Stage I,15.678,5.098,8.940159059,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-457,Stage II,16.778,10.843,13.48791511,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-457,Stage II,10.842,8.1,9.371243247,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-457,Stage II,12.127,7.889,9.781099274,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-457,Stage I,10.842,8.1,9.371243247,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-457,Stage I,12.127,7.889,9.781099274,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-457,Stage II,13.67,8.789,10.9610962,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-457,Stage II,15.377,8.316,11.30818871,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-457,Stage II,12.758,8.643,10.50082825,spermatocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
@@ -602,16 +602,16 @@ ACR-457,Stage II,137.902,79.049,104.4079269,oocyte,7,mahana,July,Rep6,ACR457_202
 ACR-457,Stage II,104.701,77.455,90.05340613,oocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-457,Stage II,89.301,74.423,81.52329926,oocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-457,Stage III,198.776,100.998,141.689726,oocyte,7,mahana,July,Rep6,ACR457_20220725,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-462,Stage II,37.46,29.022,32.9721719,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-462,Stage II,40.406,35.407,37.82400352,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-462,Stage II,37.56,36.024,36.78398347,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-462,Stage II,28.897,28.4,28.64742222,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-462,Stage II,40.179,36.639,38.36819491,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-462,Stage II,28.268,22.822,25.39945464,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-462,Stage II,47.247,26.854,35.61981103,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-462,Stage II,40.388,31.365,35.59170718,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-462,Stage II,35.538,33.361,34.43229905,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-462,Stage II,45.667,30.111,37.08205815,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-462,Stage III,37.46,29.022,32.9721719,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-462,Stage III,40.406,35.407,37.82400352,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-462,Stage III,37.56,36.024,36.78398347,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-462,Stage III,28.897,28.4,28.64742222,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-462,Stage III,40.179,36.639,38.36819491,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-462,Stage III,28.268,22.822,25.39945464,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-462,Stage III,47.247,26.854,35.61981103,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-462,Stage III,40.388,31.365,35.59170718,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-462,Stage III,35.538,33.361,34.43229905,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-462,Stage III,45.667,30.111,37.08205815,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-462,Stage III,48.977,36.787,42.4466359,spermatocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-462,Stage III,224.882,194.037,208.8909491,oocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-462,Stage III,194.539,103.895,142.1676103,oocyte,6,mahana,August,Rep3,ACR462_20220811,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
@@ -651,9 +651,75 @@ ACR-423,Stage III,166.596,132.438,148.5383487,oocyte,6,mahana,August,Rep6,ACR423
 ACR-423,Stage III,134.487,134.488,134.4875,oocyte,6,mahana,August,Rep6,ACR423_20220811,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-423,Stage II,176.169,110.498,139.5217623,oocyte,6,mahana,August,Rep6,ACR423_20220811,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-423,Stage III,225.334,190.887,207.3965556,oocyte,6,mahana,August,Rep6,ACR423_20220811,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-437,,,,0,spermatocyte,4,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-437,Stage III,254.313,142.151,190.1337615,oocyte,4,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-437,Stage II,168.996,74.79,112.4242449,oocyte,4,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-437,Stage III,169.115,125.691,145.7951764,oocyte,4,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-437,Stage III,188.838,146.778,166.4850262,oocyte,4,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-437,Stage III,191.334,150.778,169.8498097,oocyte,4,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-437,,,,0,spermatocyte,6,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-437,Stage III,254.313,142.151,190.1337615,oocyte,6,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-437,Stage II,168.996,74.79,112.4242449,oocyte,6,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-437,Stage III,169.115,125.691,145.7951764,oocyte,6,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-437,Stage III,188.838,146.778,166.4850262,oocyte,6,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-437,Stage III,191.334,150.778,169.8498097,oocyte,6,mahana,August,Rep7,ACR437_20220811,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-421,NA,0,0,0,spermatocyte,6,mahana,September,Rep3,ACR421_20220917,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-421,Stage IV,275.087,224.323,248.4116364,oocyte,6,mahana,September,Rep3,ACR421_20220917,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-421,Stage III,299.245,188.99,237.8115063,oocyte,6,mahana,September,Rep3,ACR421_20220917,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-421,Stage III,275.258,193.31,230.6731974,oocyte,6,mahana,September,Rep3,ACR421_20220917,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-421,Stage III,304.572,155.373,217.5368138,oocyte,6,mahana,September,Rep3,ACR421_20220917,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-421,Stage IV,302.394,231.673,264.6819321,oocyte,6,mahana,September,Rep3,ACR421_20220917,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-421,Stage V,359.643,286.081,320.7600803,oocyte,6,mahana,September,Rep3,ACR421_20220917,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-421,Stage V,370.889,276.334,320.1394086,oocyte,6,mahana,September,Rep3,ACR421_20220917,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-421,Stage IV,288.234,200.998,240.695778,oocyte,6,mahana,September,Rep3,ACR421_20220917,P4,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage V,351.464,346.766,349.1070974,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,353.182,261.155,303.7025604,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage V,396.228,249.697,314.5424342,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage V,457.357,230.849,324.9313867,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,450.7,177.403,282.7640927,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,241.564,113.581,165.641422,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,388.023,239.117,304.6028491,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,320.93,286.759,303.3637517,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,405.345,234.606,308.3769918,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,426.673,214.361,302.4269349,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,412.123,155.889,253.4668466,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,269.162,165.787,211.2428945,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,198.765,100.887,141.6079255,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,245.667,180.875,210.7961542,oocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,72.342,31.438,47.68949356,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,57.379,42.304,49.26825769,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,40.415,37.244,38.79711665,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,50.346,26.742,36.69267954,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,46.355,23.834,33.23890898,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,57.408,28.322,40.32256658,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,78.242,23.552,42.9273291,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,89.662,26.321,48.57976433,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,125.139,46.724,76.4656435,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,89.376,50.91,67.45466744,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage V,99.003,73.466,85.28396331,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,115.887,52.274,77.83236498,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,56.552,32.196,42.67022606,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,51.815,45.922,48.7795903,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,65.401,43.851,53.55277071,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,50.003,46.49,48.21451514,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,83.503,39.499,57.43069734,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage V,140.556,77.554,104.4063218,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,70.895,44.042,55.87806001,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,62.155,37.372,48.19602328,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,70.679,34.567,49.428342,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,80.172,42.366,58.28007337,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,96.226,50.176,69.48550767,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,82.203,39.978,57.32635985,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,78.708,51.257,63.51642273,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage V,98.53,64.777,79.89041125,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,100.818,59.468,77.43025781,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,59.617,52.698,56.05084001,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,64.698,41.699,51.94075377,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,88.322,56.498,70.64004782,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,59.072,33.407,44.42317305,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,60.08,26.783,40.11387092,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,75.142,69.894,72.47051089,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,117.608,46.984,74.33501377,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,98.528,38.57,61.64596467,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,63.908,30.014,43.79651484,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,68.21,36.295,49.75622524,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,94.814,28.628,52.09928207,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,66.855,42.069,53.03322539,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,52.092,42.765,47.19866926,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,76.641,37.988,53.95774558,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage IV,64.329,47.174,55.08771411,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-430,Stage III,53.862,35.264,43.58198674,spermatocyte,6,mahana,September,Rep4,ACR430_20220917,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
