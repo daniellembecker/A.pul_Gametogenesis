@@ -143,7 +143,7 @@ oogen_size <- oogen_size %>%
 # count number of oocytes per timmepoint for count on x axis
 oogen_size <- oogen_size %>%
   group_by(colony_id, timepoint) %>%
-  mutate(count = n()) %>%
+  mutate(count = if (all(is.na(geometric.mean) | geometric.mean == 0)) 0 else n()) %>%
   ungroup()
 
 # Reorder the levels of the 'timepoint' variable from December to October
@@ -262,17 +262,17 @@ ggsave("histology/output/oogen.size.temp.jpg", oogen.size.temp , width = 13, hei
 ```
 
 
-
-
-
-
 # Plot Spermatogenesis size plots
 ```{r}
-
 # select for grand mean size dataframe
 spermato_size <- abundance %>%
   dplyr::select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage) 
 
+# select just oocytes, remove any spermatocyte data
+spermato_size <- spermato_size %>%
+  filter(gonad.type != "oocyte")
+
+# group by colony id and timepoint
 spermato_size <- spermato_size %>%
   group_by(colony_id, timepoint) %>%
   mutate(count = n()) %>%
@@ -283,39 +283,39 @@ spermato_size$timepoint <- factor(spermato_size$timepoint,
                                                  levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
                                                  ordered = TRUE)
 
-# Calculate mean oocyte size per month
-mean_size <- oogen_size %>%
+# Calculate mean spermatocyte size per month
+mean_size_sperm <- spermato_size %>%
   group_by(timepoint, replicate_id, count) %>%
   summarise(mean_size = mean(geometric.mean, na.rm = TRUE))
 
 # Plot with reordered months and size
-oogen.size.plot <- mean_size %>% 
+sperm.size.plot <- mean_size_sperm %>% 
   ggplot(aes(x = replicate_id, y = mean_size)) +
   geom_col() +
   facet_wrap(~ timepoint, ncol = 11) +
   theme_bw() +
-  ylab("Oocyte Diameter (microns)") +
+  ylab("Spermatocyte Diameter (microns)") +
   xlab("Colony ID") +
   theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
         axis.text.y = element_text(size = 18),  # Increase size of y-axis text
         legend.position = "top",
         legend.title = element_blank(),
         text = element_text(size = 18)) +  # Increase size of all other text elements
-  ylab(expression("Mean oocyte diameter ("*mu*"m)")) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 400)) + # Ensure the y-axis starts at 0
-  guides(fill = guide_legend(ncol = length(unique(oogen_size$Stage)), byrow = TRUE))  # Set ncol and byrow for the legend # Remove legend titles
+  ylab(expression("Mean spermatocyte diameter ("*mu*"m)")) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) + # Ensure the y-axis starts at 0
+  guides(fill = guide_legend(ncol = length(unique(spermato_size$Stage)), byrow = TRUE))  # Set ncol and byrow for the legend # Remove legend titles
 
-oogen.size.plot
+sperm.size.plot
 
 # Add count value on the x-axis
-oogen.size.plot2 <- oogen.size.plot +
+sperm.size.plot2 <- sperm.size.plot +
   geom_text(aes(x = replicate_id, y = 0, label = count), vjust = -0.5, size = 5, color = "black")
 
-oogen.size.plot2
+sperm.size.plot2
 
 # save oogenesis size plots
-ggsave("histology/output/oogenesis_size.pdf", oogen.size.plot2 , width = 13, height = 8)
-ggsave("histology/output/oogenesis_size.jpg", oogen.size.plot2 , width = 13, height = 8)
+ggsave("histology/output/sperm_size.pdf", sperm.size.plot2 , width = 13, height = 8)
+ggsave("histology/output/sperm_size.jpg", sperm.size.plot2 , width = 13, height = 8)
 
 
 ```
