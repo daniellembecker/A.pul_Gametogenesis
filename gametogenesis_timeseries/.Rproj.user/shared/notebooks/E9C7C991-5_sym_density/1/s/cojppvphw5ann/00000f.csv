@@ -1,0 +1,17 @@
+"0","# Calculate mean counts for each sample"
+"0","sym_counts <- sym_counts %>%"
+"0","  select(colony_id, Squares.Counted, matches(""Count[0-9]"")) %>%"
+"0","  gather(""rep"", ""count"", -colony_id, -Squares.Counted) %>%"
+"0","  group_by(colony_id, Squares.Counted) %>%"
+"0","  summarise(mean_count = mean(count, na.rm = TRUE))"
+"1","[38;5;232m`summarise()` has grouped output by 'colony_id'. You can override using the `.groups` argument.[39m
+"
+"0","# Join mean counts with sample metadata"
+"0","sym_counts <- full_join(sym_counts, metadata)"
+"1","[38;5;232mJoining with `by = join_by(colony_id)`[39m
+"
+"0","# Normalize counts by homogenat volume and surface area"
+"0","sym_counts <- sym_counts %>%"
+"0","  mutate(cells.mL = mean_count * 10000 / Squares.Counted,"
+"0","         cells = cells.mL * homog_vol_ml,"
+"0","         cells.cm2 = cells / surface.area.cm2)"

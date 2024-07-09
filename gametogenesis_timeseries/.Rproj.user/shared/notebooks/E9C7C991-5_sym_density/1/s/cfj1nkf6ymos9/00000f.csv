@@ -1,0 +1,6 @@
+"0","sym_counts %>%"
+"0","  select(colony_id, species, cells.cm2) %>%"
+"0","  mutate(timepoint=""APRIL"")%>%"
+"0","  write_csv(path = ""April_2022/output/5_sym_densities.csv"")"
+"0",""
+"0",""
