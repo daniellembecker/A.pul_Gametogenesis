@@ -68,12 +68,14 @@ master<-read.csv("gametogenesis_timeseries_analysis/Output/master_timeseries.csv
 # Rename columns for phys data
 ```{r}
 phys_data <-master%>%
-   dplyr::select(colony_id, timepoint, Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Total_Chl_cm2, host_prot_mg.cm2, holobiont_prot_mg.cm2, cells.cm2)%>%
+   dplyr::select(colony_id, timepoint, Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Total_Chl_cm2, host_prot_mg.cm2, holobiont_prot_mg.cm2, cells.cm2, chla.ug.cm2, chlc2.ug.cm2)%>%
   filter(Host_AFDW.mg.cm2>0)%>%
   filter(Sym_AFDW.mg.cm2>0)%>%
   filter(holobiont_prot_mg.cm2>0)%>%
   filter(host_prot_mg.cm2>0)%>%
-  dplyr::rename(Host_Biomass=Host_AFDW.mg.cm2, Symbiont_Biomass=Sym_AFDW.mg.cm2, Symbiont_Density=cells.cm2, Host_Protein=host_prot_mg.cm2, Holobiont_Protein=holobiont_prot_mg.cm2, Total_Chlorophyll=Total_Chl_cm2)
+  filter(chlc2.ug.cm2>0)%>%
+  filter(chla.ug.cm2>0)%>%
+  dplyr::rename(Host_Biomass=Host_AFDW.mg.cm2, Symbiont_Biomass=Sym_AFDW.mg.cm2, Symbiont_Density=cells.cm2, Host_Protein=host_prot_mg.cm2, Holobiont_Protein=holobiont_prot_mg.cm2, Total_Chlorophyll=Total_Chl_cm2, Chlorophylla = chla.ug.cm2, Chlorophyllc2 = chlc2.ug.cm2)
 
 ```
 
@@ -113,10 +115,10 @@ repo_wide_data <- repo_data %>%
 # Correlation Analysis
 ```{r}
 # Prepare the data for correlation analysis
-cor.df <- phys_data %>% dplyr::select(3:8) %>% na.omit()
+cor.df <- phys_data %>% dplyr::select(3:10) %>% na.omit()
 
 # Save the correlation matrix plot as a PNG file with the absolute path
-png(file = save_path, height = 1400, width = 1400)
+png(file = "gametogenesis_timeseries_analysis/Figures/correlation-matrix.png", height = 1400, width = 1400)
 corrplot(cor(cor.df), addCoef.col = "black", # Specify color for coefficients
          number.cex = 1.3, cl.cex = 2.5, tl.col = "black", tl.cex = 2)
 dev.off()
