@@ -36,9 +36,11 @@ if (!require("GGally")) install.packages("GGally")
 if (!require("broom")) install.packages("broom")
 if (!require("cowplot")) install.packages("cowplot")
 if (!require("pairwiseAdonis")) install.packages("pairwiseAdonis")
+if (!require("corrplot")) install.packages("corrplot")
 
 # load packages
 library(tidyverse)
+library(corrplot)
 library(ggplot2)
 library(RColorBrewer)
 library(lme4)
@@ -61,8 +63,70 @@ library(pairwiseAdonis)
 Load in master dataframe generated from 1_assemble_data.Rmd.  
 ```{r}
 master<-read.csv("gametogenesis_timeseries_analysis/Output/master_timeseries.csv")
+```
+
+# Rename columns for phys data
+```{r}
+phys_data <-master%>%
+   dplyr::select(colony_id, timepoint, Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Total_Chl_cm2, host_prot_mg.cm2, holobiont_prot_mg.cm2, cells.cm2)%>%
+  filter(Host_AFDW.mg.cm2>0)%>%
+  filter(Sym_AFDW.mg.cm2>0)%>%
+  filter(holobiont_prot_mg.cm2>0)%>%
+  filter(host_prot_mg.cm2>0)%>%
+  dplyr::rename(Host_Biomass=Host_AFDW.mg.cm2, Symbiont_Biomass=Sym_AFDW.mg.cm2, Symbiont_Density=cells.cm2, Host_Protein=host_prot_mg.cm2, Holobiont_Protein=holobiont_prot_mg.cm2, Total_Chlorophyll=Total_Chl_cm2)
 
 ```
+
+# Load in histological data
+Select only colony_id, timepoint, Stage, geometric_mean, and gonad.type
+```{r}
+#load histo data
+histo.data <- read.csv("../histology/data/histological_data.csv")
+
+#Select only colony_id, timepoint, Stage, geometric_mean, and gonad.type
+repo_data <- histo.data%>%
+   dplyr::select(colony_id, timepoint, Stage, geometric.mean, gonad.type) %>%
+   na.omit
+
+#rename gonad.type information
+repo_data <- repo_data %>%
+  mutate(gonad.type = case_when(
+    gonad.type == "oocyte" ~ "oocyte_size",
+    gonad.type == "spermatocyte" ~ "spermary_size",
+    TRUE ~ gonad.type))  # This keeps any other values unchanged
+  
+# Transform data from long to wide format
+repo_wide_data <- repo_data %>%
+  pivot_wider(
+    id_cols = colony_id,
+    names_from = c(timepoint, Stage, gonad.type),
+    values_from = geometric.mean,
+    values_fill = list(geometric.mean = 0)) %>%
+  arrange(colony_id)
+
+
+
+
+```
+
+
+# Correlation Analysis
+```{r}
+# Prepare the data for correlation analysis
+cor.df <- phys_data %>% dplyr::select(3:8) %>% na.omit()
+
+# Save the correlation matrix plot as a PNG file with the absolute path
+png(file = save_path, height = 1400, width = 1400)
+corrplot(cor(cor.df), addCoef.col = "black", # Specify color for coefficients
+         number.cex = 1.3, cl.cex = 2.5, tl.col = "black", tl.cex = 2)
+dev.off()
+
+# Display the correlation matrix plot without saving it
+corrplot(cor(cor.df), tl.col = "black", 
+         method = 'circle', col = colorRampPalette(c("red", "white", "blue"))(200), 
+         order = 'FPC', type = 'lower', diag = FALSE)
+```
+
 
 Set seed for permutation tests (randomly picked). 
 ```{r}
@@ -75,42 +139,11 @@ set.seed(2534)
 
 ### PCA's for centroid and trajectories  
 
-#### Acropora  
 
-Generate PCA using scaled (scaled_acr_afdw) from dataframe (acr_data_afdw).   
- 
 ```{r}
-acr_data_afdw <-master%>%
-  select(colony_id, timepoint, code, Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Ratio_AFDW.mg.cm2, Total_Chl, Total_Chl_cell, prot_mg.mgafdw, cells.mgAFDW, cre.umol.mgafdw, Am, AQY, Rd, Ik, Ic, calc.umol.cm2.hr)%>%
-  filter(Host_AFDW.mg.cm2>0)%>%
-  filter(Sym_AFDW.mg.cm2>0)%>%
-  filter(Ratio_AFDW.mg.cm2>0)%>%
-  filter(species=="Acropora")%>%
-  filter(Sym_AFDW.mg.cm2<20)%>%
-  filter(Ic<1000)%>%
-  filter(prot_mg.mgafdw<1.5)%>% #remove outliers
-  rename(Host_Biomass=Host_AFDW.mg.cm2, Symbiont_Biomass=Sym_AFDW.mg.cm2, S_H_Biomass_Ratio=Ratio_AFDW.mg.cm2, Host_Protein=prot_mg.mgafdw, Symbiont_Density=cells.mgAFDW, Antiox_Capacity=cre.umol.mgafdw, Calc=calc.umol.cm2.hr)
 
-acr_data_afdw<-acr_data_afdw[complete.cases(acr_data_afdw), ]
-
-acr_data_afdw[,-c(1:4)]<-log(acr_data_afdw[,-c(1:4)]+1)
-
-scaled_acr_afdw<-prcomp(acr_data_afdw[c(5:18)], scale=TRUE, center=TRUE) 
-
-acr_info<-acr_data_afdw[c(2,4)]
-
-acr_data<-scaled_acr_afdw%>%
-  augment(acr_info)%>%
-  group_by(timepoint, site)%>%
-  mutate(PC1.mean = mean(.fittedPC1),
-         PC2.mean = mean(.fittedPC2))
-
-acr.centroids<-acr_data %>% 
-  select(timepoint, site, PC1.mean, PC2.mean)%>%
-  group_by(timepoint, site)%>%
-  summarise(PC1.mean = mean(PC1.mean),
-         PC2.mean = mean(PC2.mean))
 ```
+
 
 Examine PERMANOVA results.  
  
@@ -238,339 +271,7 @@ acrArrows<-ggplot2::autoplot(scaled_acr_afdw, data=acr_data_afdw, loadings=TRUE,
          axis.title = element_text(size=20));acrArrows
 ```
 
-#### Porites
 
-Generate PCA using scaled (scaled_por_afdw) from dataframe (por_data_afdw).   
- 
-Calculate centroid locations for each site and timepoint and pull PC1 and PC2 locations.     
-```{r}
-por_data_afdw<-master%>%
-  select(colony_id_corr, timepoint, species, site, Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Ratio_AFDW.mg.cm2, Total_Chl, Total_Chl_cell, prot_mg.mgafdw, cells.mgAFDW, cre.umol.mgafdw, Am, AQY, Rd, Ik, Ic, calc.umol.cm2.hr)%>%
-  filter(Host_AFDW.mg.cm2>0)%>%
-  filter(Sym_AFDW.mg.cm2>0)%>%
-  filter(Ratio_AFDW.mg.cm2>0)%>%
-  filter(species=="Porites")%>%
-  filter(Sym_AFDW.mg.cm2<20)%>%
-  filter(prot_mg.mgafdw<1.5)%>% #remove outliers
-  filter(Ic<1000)%>%
-  rename(Host_Biomass=Host_AFDW.mg.cm2, Symbiont_Biomass=Sym_AFDW.mg.cm2, S_H_Biomass_Ratio=Ratio_AFDW.mg.cm2, Host_Protein=prot_mg.mgafdw, Symbiont_Density=cells.mgAFDW, Antiox_Capacity=cre.umol.mgafdw, Calc=calc.umol.cm2.hr)
-
-por_data_afdw<-por_data_afdw[complete.cases(por_data_afdw), ]
-
-por_data_afdw[,-c(1:4)]<-log(por_data_afdw[,-c(1:4)]+1)
-
-scaled_por_afdw<-prcomp(por_data_afdw[c(5:18)], scale=TRUE, center=TRUE) 
-
-por_info<-por_data_afdw[c(2,4)]
-
-por_data<-scaled_por_afdw%>%
-  augment(por_info)%>%
-  group_by(timepoint, site)%>%
-  mutate(PC1.mean = mean(.fittedPC1),
-         PC2.mean = mean(.fittedPC2))
-
-por.centroids<-por_data %>% 
-  select(timepoint, site, PC1.mean, PC2.mean)%>%
-  group_by(timepoint, site)%>%
-  summarise(PC1.mean = mean(PC1.mean),
-         PC2.mean = mean(PC2.mean))
-```
-
-```{r}
-# scale data
-vegan <- scale(por_data_afdw[ ,5:18])
-
-# PerMANOVA - partitioning the euclidean distance matrix by species
-permanova<-adonis2(vegan ~ timepoint*site, data = por_data_afdw, method='eu')
-z_por<-permanova
-z_por
-```
-
-adonis2(formula = vegan ~ timepoint * site, data = por_data_afdw, method = "eu")
-                Df SumOfSqs      R2       F Pr(>F)    
-timepoint        3   337.22 0.17455 11.2136  0.001 ***
-site             2   210.18 0.10879 10.4838  0.001 ***
-timepoint:site   6   111.51 0.05772  1.8541  0.003 ** 
-Residual       127  1273.08 0.65894                   
-Total          138  1932.00 1.00000     
-
-Examine dispersion for this model by site 
-```{r}
-#conduct pairwise adonis to look at pairwise permanova comparisons
-pairwise.adonis(x=por_data_afdw[ ,5:18],factors=por_data_afdw$site, sim.function="vegdist",  sim.method='euclidean', p.adjust.m='bonferroni')
-
-#evaluate dispersion
-beta_site<-betadisper(vegdist(por_data_afdw[ ,5:18], "euclidian"), por_data_afdw$site)
-anova(beta_site)
-
-#conduct posthoc analysis of betadispersion
-TukeyHSD(beta_site)
-```
-There is a difference in dispersion by site, so therefore differences are likely due to both dispersion and centroid location. 
-
-Examine dispersion for this model by season 
-```{r}
-#conduct pairwise adonis to look at pairwise permanova comparisons
-pairwise.adonis(x=por_data_afdw[ ,5:18],factors=por_data_afdw$timepoint, sim.function="vegdist",  sim.method='euclidean', p.adjust.m='bonferroni')
-
-#evaluate dispersion
-beta_time<-betadisper(vegdist(por_data_afdw[ ,5:18], "euclidian"), por_data_afdw$timepoint)
-anova(beta_time)
-
-#conduct posthoc analysis of betadispersion
-TukeyHSD(beta_time)
-```
-There is no difference in dispersion between time points, therefore differences are due to centroid location. 
-
-Assemble plot with background points
-```{r}
-#1. make plot with dots
-porPCA<-ggplot(por_data, aes(.fittedPC1, .fittedPC2, color=site)) + 
-  geom_point(size = 4, alpha=0.2, show.legend=FALSE)+
-  scale_colour_manual(values=c("#374d7c", "#00cccc", "#ff6633")) +
-  scale_fill_manual(values=c("#374d7c", "#00cccc", "#ff6633")) + 
-  theme_classic()+
-  ylab("PC2")+
-  xlab("PC1")+
-  ylim(-6,6)+
-  xlim(-6,6)+
-  ggtitle(expression(italic("Porites")))+
-  #geom_text(x=3, y=5.5, label=paste("T=",z_por$`Pr(>F)`[1]), size=6, color=ifelse(z_por$`Pr(>F)`[1] < 0.05, "black", "darkgray")) + 
-  #geom_text(x=3, y=4.75, label=paste("S=",z_por$`Pr(>F)`[2]), size=6, color=ifelse(z_por$`Pr(>F)`[2] < 0.05, "black", "darkgray")) + 
-  #geom_text(x=3, y=4, label=paste("TxS=",z_por$`Pr(>F)`[3]), size=6, color=ifelse(z_por$`Pr(>F)`[3] < 0.05, "black", "darkgray")) + 
-  geom_text(x=3, y=5.5, label="T=0.001", size=6, color="black") + 
-  geom_text(x=3, y=4.75, label="S=0.001", size=6, color="black") + 
-  geom_text(x=3, y=4, label="TxS=0.003", size=6, color="black") + 
-  theme(legend.text = element_text(size=18), 
-         legend.position="none",
-         plot.background = element_blank(),
-         legend.title = element_blank(), 
-         axis.text = element_text(size=18), 
-         plot.margin = margin(1, 1, 1, 1, "cm"),
-         title = element_text(size=25, face="bold"),
-         axis.title = element_text(size=18,  face="bold"));porPCA
-```
-
-Add centroids  
-
-```{r}
-#2. add centroids 
-porPCAcen<-porPCA + geom_point(aes(x=PC1.mean, y=PC2.mean, colour=site), data=por.centroids, size=3, show.legend=FALSE) + 
-  scale_colour_manual(values=c("#374d7c", "#00cccc", "#ff6633"))+
-  theme(legend.position=c(1,0.3)); porPCAcen
-
-#build a plot for the legend
-legend_plot<-porPCA + geom_point(aes(x=PC1.mean, y=PC2.mean, colour=site), data=por.centroids, size=3, show.legend=TRUE) + 
-  scale_colour_manual(values=c("#374d7c", "#00cccc", "#ff6633"))+
-  theme(legend.position="bottom")+theme(legend.text=element_text(size=18))
-
-# extract the legend from one of the plots
-legend <- get_legend(
-  # create some space to the left of the legend
-  legend_plot + theme(legend.box.margin = margin(1,1,1,1))
-)
-
-```
-
-Add segments
-
-```{r}
-#3. add segments
-segpoints<-por.centroids%>%
-  gather(variable, value, -(timepoint:site)) %>%
-  unite(temp, timepoint, variable) %>%
-  spread(temp, value)
-  
-porPCAfull<-porPCAcen + 
-  geom_segment(aes(x = timepoint1_PC1.mean, y = timepoint1_PC2.mean, xend = timepoint2_PC1.mean, yend = timepoint2_PC2.mean, colour = site), data = segpoints, size=2, show.legend=FALSE) +
-  geom_segment(aes(x = timepoint2_PC1.mean, y = timepoint2_PC2.mean, xend = timepoint3_PC1.mean, yend = timepoint3_PC2.mean, colour = site), data = segpoints, size=2, show.legend=FALSE) +
-  geom_segment(aes(x = timepoint3_PC1.mean, y = timepoint3_PC2.mean, xend = timepoint4_PC1.mean, yend = timepoint4_PC2.mean, colour = site), data = segpoints, size=2, arrow = arrow(length=unit(0.5,"cm")), show.legend=FALSE); porPCAfull
-```
-
-Add bi plot with loadings  
-```{r}
-#1. make plot with dots
-porArrows<-ggplot2::autoplot(scaled_por_afdw, data=por_data_afdw, loadings=TRUE,  colour="site", loadings.label.colour="black", loadings.colour="black", loadings.label=TRUE, frame=FALSE, loadings.label.size=3.5, loadings.label.vjust=-0.1, loadings.label.hjust=0.1, loadings.label.repel=FALSE, size=4, alpha=0.0) + 
-  #geom_point(aes(fill=site, colour=site), alpha=0.0)+
-  scale_colour_manual(values=c("#374d7c", "#00cccc", "#ff6633")) +
-  scale_fill_manual(values=c("#374d7c", "#00cccc", "#ff6633")) + 
-  theme_classic()+
-  #xlim(-0.5,0.1)+
-  #ylim(-0.5, 0.5)+
-  ggtitle(expression(italic("Porites")))+
-   theme(legend.text = element_text(size=18), 
-         legend.position="none",
-         #axis.text.x=element_blank(),
-         #axis.text.y=element_blank(),
-         plot.background = element_blank(),
-         legend.title = element_blank(), 
-         plot.margin = margin(1, 1, 1, 1, "cm"),
-         axis.text = element_text(size=18), 
-         title = element_text(size=25, face="bold"),
-         axis.title = element_text(size=20));porArrows
-```
-
-
-#### Pocillopora   
-
-Generate PCA using scaled (scaled_poc_afdw) from dataframe (poc_data_afdw). 
- 
-```{r}
-poc_data_afdw<-master%>%
-  select(colony_id_corr, timepoint, species, site, Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Ratio_AFDW.mg.cm2, Total_Chl, Total_Chl_cell, prot_mg.mgafdw, cells.mgAFDW, cre.umol.mgafdw, Am, AQY, Rd, Ik, Ic, calc.umol.cm2.hr)%>%
-  filter(Host_AFDW.mg.cm2>0)%>%
-  filter(Sym_AFDW.mg.cm2>0)%>%
-  filter(Ratio_AFDW.mg.cm2>0)%>%
-  filter(species=="Pocillopora")%>%
-  filter(Sym_AFDW.mg.cm2<20)%>%
-  filter(Ic<1000)%>%
-  rename(Host_Biomass=Host_AFDW.mg.cm2, Symbiont_Biomass=Sym_AFDW.mg.cm2, S_H_Biomass_Ratio=Ratio_AFDW.mg.cm2, Host_Protein=prot_mg.mgafdw, Symbiont_Density=cells.mgAFDW, Antiox_Capacity=cre.umol.mgafdw, Calc=calc.umol.cm2.hr)
-
-poc_data_afdw<-poc_data_afdw[complete.cases(poc_data_afdw), ]
- 
-poc_data_afdw[,-c(1:4)]<-log(poc_data_afdw[,-c(1:4)]+1)
-
-scaled_poc_afdw<-prcomp(poc_data_afdw[c(5:18)], scale=TRUE, center=TRUE) 
-
-poc_info<-poc_data_afdw[c(2,4)]
-
-poc_data<-scaled_poc_afdw%>%
-  augment(poc_info)%>%
-  group_by(timepoint, site)%>%
-  mutate(PC1.mean = mean(.fittedPC1),
-         PC2.mean = mean(.fittedPC2))
-
-poc.centroids<-poc_data %>% 
-  select(timepoint, site, PC1.mean, PC2.mean)%>%
-  group_by(timepoint, site)%>%
-  summarise(PC1.mean = mean(PC1.mean),
-         PC2.mean = mean(PC2.mean))
-``` 
-  
-```{r}
-# scale data
-vegan <- scale(poc_data_afdw[ ,5:18])
-
-# PerMANOVA - partitioning the euclidean distance matrix by species
-permanova<-adonis2(vegan ~ timepoint*site, data = poc_data_afdw, method='eu')
-z_poc<-permanova
-z_poc
-```
-
-adonis2(formula = vegan ~ timepoint * site, data = poc_data_afdw, method = "eu")
-                Df SumOfSqs      R2       F Pr(>F)    
-timepoint        3   454.84 0.24613 15.4796  0.001 ***
-site             2    69.20 0.03745  3.5327  0.001 ***
-timepoint:site   6   138.82 0.07512  2.3622  0.001 ***
-Residual       121  1185.13 0.64131                   
-Total          132  1848.00 1.00000   
-
-Examine dispersion for this model by site 
-```{r}
-#conduct pairwise adonis to look at pairwise permanova comparisons
-pairwise.adonis(x=poc_data_afdw[ ,5:18],factors=poc_data_afdw$site, sim.function="vegdist",  sim.method='euclidean', p.adjust.m='bonferroni')
-
-#evaluate dispersion
-beta_site<-betadisper(vegdist(poc_data_afdw[ ,5:18], "euclidian"), poc_data_afdw$site)
-anova(beta_site)
-
-#conduct posthoc analysis of betadispersion
-TukeyHSD(beta_site)
-```
-There is no difference in dispersion by site, so therefore differences are due to centroid location. 
-
-Examine dispersion for this model by season 
-```{r}
-#conduct pairwise adonis to look at pairwise permanova comparisons
-pairwise.adonis(x=poc_data_afdw[ ,5:18],factors=poc_data_afdw$timepoint, sim.function="vegdist",  sim.method='euclidean', p.adjust.m='bonferroni')
-
-#evaluate dispersion
-beta_time<-betadisper(vegdist(poc_data_afdw[ ,5:18], "euclidian"), poc_data_afdw$timepoint)
-anova(beta_time)
-
-#conduct posthoc analysis of betadispersion
-TukeyHSD(beta_time)
-```
-There is a significant difference in dispersion by timepoint, so differences are likely due to both dispersion and centroid location.
-
-Assemble plot with background points
-```{r}
-#1. make plot with dots
-pocPCA<-ggplot(poc_data, aes(.fittedPC1, .fittedPC2, color=site)) + 
-  geom_point(size = 4, alpha=0.2, show.legend=FALSE)+
-  scale_colour_manual(values=c("#374d7c", "#00cccc", "#ff6633")) +
-  scale_fill_manual(values=c("#374d7c", "#00cccc", "#ff6633")) + 
-  theme_classic()+
-  ylim(-6,6)+
-  xlim(-6,6)+
-  ylab("PC2")+
-  xlab("PC1")+
-  ggtitle(expression(italic("Pocillopora")))+
-  #geom_text(x=3, y=5.5, label=paste("T=", z_poc$`Pr(>F)`[1]), size=6, color=ifelse(z_poc$`Pr(>F)`[1] < 0.05, "black", "darkgray")) + 
-  #geom_text(x=3, y=4.75, label=paste("S=", z_poc$`Pr(>F)`[2]), size=6, color=ifelse(z_poc$`Pr(>F)`[2] < 0.05, "black", "darkgray")) + 
-  #geom_text(x=3, y=4, label=paste("TxS=", z_poc$`Pr(>F)`[3]), size=6, color=ifelse(z_poc$`Pr(>F)`[3] < 0.05, "black", "darkgray")) + 
-  geom_text(x=3, y=5.5, label="T=0.001", size=6, color="black") + 
-  geom_text(x=3, y=4.75, label="S=0.001", size=6, color="black") + 
-  geom_text(x=3, y=4, label="TxS=0.001", size=6, color="black") + 
-  theme(legend.text = element_text(size=18), 
-         legend.position="none",
-         plot.background = element_blank(),
-         plot.margin = margin(1, 1, 1, 1, "cm"),
-         legend.title = element_blank(), 
-         title = element_text(size=25, face="bold"),
-         axis.text = element_text(size=18), 
-         axis.title = element_text(size=18,  face="bold"));pocPCA
-
-```
-
-Add centroids  
-
-```{r}
-#2. add centroids 
-pocPCAcen<-pocPCA + geom_point(aes(x=PC1.mean, y=PC2.mean, colour=site), data=poc.centroids, size=3, show.legend=FALSE) + 
-  scale_colour_manual(values=c("#374d7c", "#00cccc", "#ff6633"))+
-  theme(legend.position="none"); pocPCAcen
-
-```
-
-Add segments
-
-```{r}
-#3. add segments
-segpoints<-poc.centroids%>%
-  gather(variable, value, -(timepoint:site)) %>%
-  unite(temp, timepoint, variable) %>%
-  spread(temp, value)
-  
-pocPCAfull<-pocPCAcen + 
-  geom_segment(aes(x = timepoint1_PC1.mean, y = timepoint1_PC2.mean, xend = timepoint2_PC1.mean, yend = timepoint2_PC2.mean, colour = site), data = segpoints, size=2, show.legend=FALSE) +
-  geom_segment(aes(x = timepoint2_PC1.mean, y = timepoint2_PC2.mean, xend = timepoint3_PC1.mean, yend = timepoint3_PC2.mean, colour = site), data = segpoints, size=2, show.legend=FALSE) +
-  geom_segment(aes(x = timepoint3_PC1.mean, y = timepoint3_PC2.mean, xend = timepoint4_PC1.mean, yend = timepoint4_PC2.mean, colour = site), data = segpoints, size=2, arrow = arrow(length=unit(0.5,"cm")), show.legend=FALSE); pocPCAfull
-```
-
-Add bi plot with loadings  
-```{r}
-
-pocArrows<-ggplot2::autoplot(scaled_poc_afdw, data=poc_data_afdw, loadings=TRUE,  colour="site", loadings.label.colour="black", loadings.colour="black", loadings.label=TRUE, frame=FALSE, loadings.label.size=3.5, loadings.label.vjust=0, loadings.label.hjust=-0.1, loadings.label.repel=TRUE, size=4, alpha=0.0) + 
-  #geom_point(aes(fill=site, colour=site), alpha=0.2)+
-  scale_colour_manual(values=c("#374d7c", "#00cccc", "#ff6633")) +
-  scale_fill_manual(values=c("#374d7c", "#00cccc", "#ff6633")) + 
-  theme_classic()+
-  #xlim(-.3,.6)+
-  #ylim(-.3, .3)+
-  ggtitle(expression(italic("Pocillopora")))+
-   theme(legend.text = element_text(size=18), 
-         legend.position="none",
-         #axis.text.x=element_blank(),
-         #axis.text.y=element_blank(),
-         plot.background = element_blank(),
-         legend.title = element_blank(), 
-         plot.margin = margin(1, 1, 1, 1, "cm"),
-         axis.text = element_text(size=18), 
-         title = element_text(size=25, face="bold"),
-         axis.title = element_text(size=20));pocArrows
-```
- 
 #### Assemble all plots    
 
 Assemble trajectory PCAs

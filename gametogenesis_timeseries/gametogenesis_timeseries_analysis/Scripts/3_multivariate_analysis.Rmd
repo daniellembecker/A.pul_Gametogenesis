@@ -77,8 +77,40 @@ phys_data <-master%>%
 
 ```
 
-# Correlation Analysis
+# Load in histological data
+Select only colony_id, timepoint, Stage, geometric_mean, and gonad.type
+```{r}
+#load histo data
+histo.data <- read.csv("../histology/data/histological_data.csv")
 
+#Select only colony_id, timepoint, Stage, geometric_mean, and gonad.type
+repo_data <- histo.data%>%
+   dplyr::select(colony_id, timepoint, Stage, geometric.mean, gonad.type) %>%
+   na.omit
+
+#rename gonad.type information
+repo_data <- repo_data %>%
+  mutate(gonad.type = case_when(
+    gonad.type == "oocyte" ~ "oocyte_size",
+    gonad.type == "spermatocyte" ~ "spermary_size",
+    TRUE ~ gonad.type))  # This keeps any other values unchanged
+  
+# Transform data from long to wide format
+repo_wide_data <- repo_data %>%
+  pivot_wider(
+    id_cols = colony_id,
+    names_from = c(timepoint, Stage, gonad.type),
+    values_from = geometric.mean,
+    values_fill = list(geometric.mean = 0)) %>%
+  arrange(colony_id)
+
+
+
+
+```
+
+
+# Correlation Analysis
 ```{r}
 # Prepare the data for correlation analysis
 cor.df <- phys_data %>% dplyr::select(3:8) %>% na.omit()
