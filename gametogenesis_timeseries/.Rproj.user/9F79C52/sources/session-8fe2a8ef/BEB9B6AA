@@ -1,0 +1,28 @@
+{
+    "id": "BEB9B6AA",
+    "path": "~/Desktop/Putnam_Lab/A.pul_Gametogenesis/gametogenesis_timeseries/June_2022/scripts/7_protein.Rmd",
+    "project_path": "June_2022/scripts/7_protein.Rmd",
+    "type": "r_markdown",
+    "hash": "379526887",
+    "contents": "",
+    "dirty": false,
+    "created": 1721855359606.0,
+    "source_on_save": false,
+    "relative_order": 6,
+    "properties": {
+        "chunk_output_type": "console",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "147,2",
+        "scrollLine": "132",
+        "working_dir": "project"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1721855676,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1721855676452,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -19,6 +19,12 @@ library("segmented")
 library("devtools")
 library("plotrix")
 library("gridExtra")
+# Install devtools if not already installed
+if (!require("devtools")) install.packages("devtools")
+# Load devtools
+library(devtools)
+# Install LoLinR from GitHub
+devtools::install_github("colin-olito/LoLinR")
 library("LoLinR")
 library("lubridate")
 library('tidyverse')
@@ -124,7 +130,7 @@ temp.plot <- filtered_data %>%
   theme(axis.title = element_text(size = 16),   # Adjust the size of x and y axis labels
         axis.text = element_text(size = 16)) ;temp.plot
 
-ggsave(filename="RAnalysis/output/environmental/20240129_temp_logger_plot.pdf", plot=temp.plot, width=30, height=10, units="in")
+#ggsave(filename="RAnalysis/output/environmental/20240129_temp_logger_plot.pdf", plot=temp.plot, width=30, height=10, units="in")
 
 ggsave(filename="RAnalysis/output/environmental/20240129_temp_logger_plot.png", plot=temp.plot, width=20, height=10, units="in")
 ```
@@ -157,7 +163,7 @@ temp.month <- ggplot(mean_temp_per_month, aes(x = as.numeric(month), y = mean_te
 temp.month
 
 # save mean temp per month plot
-ggsave("RAnalysis/output/environmental/mean.temp.month.pdf", temp.month , width = 10, height = 6)
+#ggsave("RAnalysis/output/environmental/mean.temp.month.pdf", temp.month , width = 10, height = 6)
 ggsave("RAnalysis/output/environmental/mean.temp.month.jpg", temp.month , width = 10, height = 6)
 
 
@@ -187,7 +193,7 @@ temp_summary_plot <- temp.data %>%
       ylim(25, 30);temp_summary_plot
 
 # save mean temp per month plot
-ggsave("RAnalysis/output/environmental/temp_summary_plot.pdf", temp_summary_plot , width = 10, height = 6)
+#ggsave("RAnalysis/output/environmental/temp_summary_plot.pdf", temp_summary_plot , width = 10, height = 6)
 ggsave("RAnalysis/output/environmental/temp_summary_plot.jpg", temp_summary_plot , width = 10, height = 6)
 
 
@@ -239,6 +245,13 @@ light.data.sep <- light.data %>%
 # Assuming your "Date" column is in a character format
 light.data.sep$Date <- as.Date(light.data.sep$Date, format = "%Y-%m-%d")
 
+# remove first two columns
+light.data.save <- light.data.sep %>%
+  select(-date, -time, -raw)
+
+# save dataframe
+write.csv(light.data.save, 'RAnalysis/output/environmental/mahana_light_data.csv')
+
 # Group by Date and calculate the mean temperature for each day
 mean_light_per_day <- light.data.sep %>%
   group_by(Date) %>%
@@ -263,7 +276,7 @@ light.plot <- mean_light_per_day %>%
   ylab(expression(atop("Light Intensity", (mu*mol~m^{-2}~s^{-1})))); light.plot
 
 
-ggsave(filename="RAnalysis/output/environmental/20240129_light_logger_plot.pdf", plot=light.plot, width=30, height=10, units="in")
+#ggsave(filename="RAnalysis/output/environmental/20240129_light_logger_plot.pdf", plot=light.plot, width=30, height=10, units="in")
 
 ggsave(filename="RAnalysis/output/environmental/20240129_light_logger_plot.png", plot=light.plot, width=20, height=10, units="in")
 
@@ -294,7 +307,7 @@ light.month <- ggplot(mean_light_per_month, aes(x = as.numeric(month), y = mean_
 light.month
 
 # save mean temp per month plot
-ggsave("RAnalysis/output/environmental/mean.light.month.pdf", light.month , width = 10, height = 6)
+#ggsave("RAnalysis/output/environmental/mean.light.month.pdf", light.month , width = 10, height = 6)
 ggsave("RAnalysis/output/environmental/mean.light.month.jpg", light.month , width = 10, height = 6)
 
 ```
@@ -322,7 +335,7 @@ light_summary_plot <- light.data %>%
 light_summary_plot
 
 # save mean temp per month plot
-ggsave("RAnalysis/output/environmental/light_summary_plot.pdf", light_summary_plot , width = 10, height = 6)
+#ggsave("RAnalysis/output/environmental/light_summary_plot.pdf", light_summary_plot , width = 10, height = 6)
 ggsave("RAnalysis/output/environmental/light_summary_plot.jpg", light_summary_plot , width = 10, height = 6)
 ```
 
@@ -360,7 +373,7 @@ light.temp <- ggplot(mean_monthly_data, aes(x = month)) +
 light.temp
 
 # save mean temp per month plot
-ggsave("RAnalysis/output/environmental/mean.light.temp.pdf", light.temp , width = 10, height = 6)
+#ggsave("RAnalysis/output/environmental/mean.light.temp.pdf", light.temp , width = 10, height = 6)
 ggsave("RAnalysis/output/environmental/mean.light.temp.jpg", light.temp , width = 10, height = 6)
 
 
