@@ -132,7 +132,7 @@ summary(sym_model)
 pairwise_results.sym <- emmeans(sym_model, pairwise ~ timepoint, adjust = "tukey")
 
 # Generate letters for significant differences
-timepoint_cld <- cld(pairwise_results.sym, Letters = letters)
+timepoint_cld_sym <- cld(pairwise_results.sym, Letters = letters)
 
 # Remove outlier data
 outlier_value <- 2430445.8
@@ -149,7 +149,7 @@ symbplot_cm2 <- filtered_sym %>%
   ggplot(aes(x = timepoint, y = cells.cm2, fill = timepoint)) +
   geom_boxplot(color = "black", fill = "white", alpha = 0.2) +
   geom_point(pch = 21, size = 2, position = position_jitterdodge(0.2)) +
-  geom_text(data = timepoint_cld, aes(label = .group, x = timepoint, y = 0.96 * max_cells_cm2), vjust = -0.5, size = 6, color = "black") +
+  geom_text(data = timepoint_cld_sym, aes(label = .group, x = timepoint, y = 0.96 * max_cells_cm2), vjust = -0.5, size = 6, color = "black") +
  # scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
   xlab("") + 
   ylab(expression(bold(paste("Symbiont Cells cm"^-2)))) +
@@ -177,7 +177,7 @@ chla_model<-lmer(log(chla.ug.cm2)~timepoint+(1|patch), data=master)
 qqPlot(residuals(chla_model))
 
 # Identify the outliers
-outliers <- c(94,308)
+outliers <- c(94,308, 45, 346)
 
 # remove outliers
 data_clean_chla <- master[-outliers, ]
@@ -192,41 +192,32 @@ summary(chla_model)
 # Perform Type III ANOVA
 anova_result <- Anova(chla_model, type = 3)
 
-# Post-hoc pairwise comparisons (optional)
+# Post-hoc pairwise comparisons
 pairwise_results.chla <- emmeans(chla_model, pairwise ~ timepoint, adjust = "tukey")
 
-# Extract pairwise comparisons
-pairwise_comparisons.chla <- pairs(pairwise_results.chla)
-
-# Filter significant comparisons
-significant_comparisons.chla <- summary(pairwise_comparisons.chla, test = "adjusted", by = NULL, infer = TRUE)
-
-# Extract significant comparisons
-significant_contrasts.chla <- subset(significant_comparisons.chla, p.value < 0.05)
+# Generate letters for significant differences
+timepoint_cld_chla <- cld(pairwise_results.chla, Letters = letters)
 
 # Define a threshold for identifying outliers for the 'Value' column
 threshold <- 10  # For example, we consider values greater than 50 as outliers
 
 # Filter out values beyond the threshold for the 'Value' column
-filtered_master <- master[master$chla.ug.cm2 <= threshold, ]
-
-# Create a data frame with significant timepoints
-significant_timepoints_chla <- c("JAN", "FEB", "JUL", "JUN", "APR", "OCT", "SEPT")
+filtered_chla <- master[master$chla.ug.cm2 <= threshold, ]
 
 # Get the maximum value of cells.cm2
 max_chla <- max(master$chla.ug.cm2, na.rm = TRUE)  # Make sure to handle any missing values
 
 # make chla plot
-chla_cm2 <- filtered_master %>%
+chla_cm2 <- filtered_chla %>%
   filter(!is.na(chla.ug.cm2)) %>%
   filter(!is.na(timepoint))%>%
-  select(colony_id, timepoint, chla.ug.cm2)%>%
+  dplyr::select(colony_id, timepoint, chla.ug.cm2)%>%
   
   ggplot(., aes(x = timepoint, y = chla.ug.cm2, fill = timepoint)) +
     geom_boxplot(color="black", fill="white", alpha=0.2) +
     geom_point(pch = 21, size=2, position = position_jitterdodge(0.2)) +
     ylim(0, 12)+
-    geom_text(data = data.frame(timepoint = significant_timepoints_chla), aes(label = ifelse(timepoint == "JUL", "**", "***")), x = significant_timepoints_chla, y = 0.1 + max_chla, vjust = -0.5, size = ifelse(significant_timepoints_chla == "JUL", 14, 14), color = "black") +  # Add significance indicators
+  geom_text(data = timepoint_cld_chla, aes(label = .group, x = timepoint, y = 1.0*max_chla), vjust = -0.5, size = 6, color = "black") +
   scale_x_discrete(limits = c("JAN","FEB","MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
     xlab("") + 
     ylab(expression(bold(paste("Chlorophyll a (", mu, "g cm"^-2, ")"))))+
@@ -243,41 +234,36 @@ chla_cm2 <- filtered_master %>%
 
 View by treatment and timepoint.   
 ```{r}
-
-# Check for normality
-qqnorm(master$chlc2.ug.cm2)
-
 # Fit a mixed-effects model with 'patch' as a random effect
 model.chlc <- lmer(chlc2.ug.cm2 ~ timepoint + (1|patch), data = master)
+qqPlot(residuals(chla_model))
 
 # Get the summary of the model
-summary(model.chlc)
+summary(chlc_model)
 
 # Perform Type III ANOVA
-anova_result <- Anova(model.chlc, type = 3)
+anova_result <- Anova(chlc_model, type = 3)
 
-# Post-hoc pairwise comparisons (optional)
-pairwise_results.chlc <- emmeans(model.chlc, pairwise ~ timepoint, adjust = "tukey")
+# Post-hoc pairwise comparisons
+pairwise_results.chlc <- emmeans(chlc_model, pairwise ~ timepoint, adjust = "tukey")
 
-# Extract pairwise comparisons
-pairwise_comparisons.chlc <- pairs(pairwise_results.chlc)
+# Generate letters for significant differences
+timepoint_cld_chlc <- cld(pairwise_results.chlc, Letters = letters)
 
-# Filter significant comparisons
-significant_comparisons.chlc <- summary(pairwise_comparisons.chlc, test = "adjusted", by = NULL, infer = TRUE)
-
-# Extract significant comparisons
-significant_contrasts.chlc <- subset(significant_comparisons.chlc, p.value < 0.05)
+# Get the maximum value of cells.cm2
+max_chlc <- max(master$chlc2.ug.cm2, na.rm = TRUE)  # Make sure to handle any missing values
 
 # Make chlc plot
 chlc_prot_cm2 <- master %>%
   filter(!is.na(chlc2.ug.cm2)) %>%
   filter(!is.na(timepoint))%>%
-  select(colony_id, timepoint, chlc2.ug.cm2)%>%
+  dplyr::select(colony_id, timepoint, chlc2.ug.cm2)%>%
   
   ggplot(., aes(x = timepoint, y = chlc2.ug.cm2, fill = timepoint)) +
     geom_boxplot(color="black", fill="white", alpha=0.2) +
     geom_point(pch = 21, size=2, position = position_jitterdodge(0.2)) +
     ylim(0, 12)+
+    geom_text(data = timepoint_cld_chlc, aes(label = .group, x = timepoint, y = 1.0*max_chlc), vjust = -0.5, size = 6, color = "black") +
   scale_x_discrete(limits = c("JAN","FEB","MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
     xlab("") + 
     ylab(expression(bold(paste("Chlorophyll c2 (", mu, "g cm"^-2, ")"))))+
@@ -291,34 +277,106 @@ chlc_prot_cm2 <- master %>%
 
 ```
 
-### Plot: Host Protein   
 
-View by treatment and timepoint.    
+
+### Plot: total-chl
+
+View by treatment and timepoint.   
 ```{r}
-
-# check for normality
-qqnorm(master$host_prot_mg.cm2)
-
 # Fit a mixed-effects model with 'patch' as a random effect
-model.host.prot <- lmer(host_prot_mg.cm2 ~ timepoint + (1|patch), data = master)
+model.totchl <- lmer(Total_Chl_cm2 ~ timepoint + (1|patch), data = master)
+qqPlot(residuals(model.totchl))
+
+# Residuals are not normally distributed. Attempt with log transformation.  
+totchl_model<-lmer(log(Total_Chl_cm2)~timepoint+(1|patch), data=master)
+qqPlot(residuals(totchl_model))
+
+# Identify the outliers
+outliers <- c(94,308)
+
+# remove outliers
+data_clean_tot <- master[-outliers, ]
+
+# Residuals are not normally distributed. Attempt with log transformation.  
+totchl_model<-lmer(log(Total_Chl_cm2)~timepoint+(1|patch), data=data_clean_tot)
+qqPlot(residuals(totchl_model))
 
 # Get the summary of the model
-summary(model.host.prot)
+summary(totchl_model)
 
 # Perform Type III ANOVA
-anova_result <- Anova(model.host.prot, type = 3)
+anova_result <- Anova(totchl_model, type = 3)
 
-# Post-hoc pairwise comparisons (optional)
-pairwise_results.host.prot <- emmeans(model.host.prot, pairwise ~ timepoint, adjust = "tukey")
+# Post-hoc pairwise comparisons
+pairwise_results.tot <- emmeans(totchl_model, pairwise ~ timepoint, adjust = "tukey")
 
-# Extract pairwise comparisons
-pairwise_comparisons.host.prot <- pairs(pairwise_results.host.prot)
+# Generate letters for significant differences
+timepoint_cld_tot <- cld(pairwise_results.tot, Letters = letters)
 
-# Filter significant comparisons
-significant_comparisons.host.prot <- summary(pairwise_comparisons.host.prot, test = "adjusted", by = NULL, infer = TRUE)
+# Get the maximum value of cells.cm2
+max_tot <- max(master$Total_Chl_cm2, na.rm = TRUE)  # Make sure to handle any missing values
 
-# Extract significant comparisons
-significant_contrasts.host.prot <- subset(significant_comparisons.host.prot, p.value < 0.05)
+# Make chlc plot
+tot.chl <- master %>%
+  filter(!is.na(Total_Chl_cm2)) %>%
+  filter(!is.na(timepoint))%>%
+  dplyr::select(colony_id, timepoint, Total_Chl_cm2)%>%
+  
+  ggplot(., aes(x = timepoint, y = Total_Chl_cm2, fill = timepoint)) +
+    geom_boxplot(color="black", fill="white", alpha=0.2) +
+    geom_point(pch = 21, size=2, position = position_jitterdodge(0.2)) +
+    ylim(0, 12)+
+      geom_text(data = timepoint_cld_tot, aes(label = .group, x = timepoint, y = 1.0*max_tot), vjust = -0.5, size = 6, color = "black") +
+  scale_x_discrete(limits = c("JAN","FEB","MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT")) +
+    xlab("") + 
+    ylab(expression(bold(paste("Total Chlorophyll (", mu, "g cm"^-2, ")"))))+
+    theme_classic() + 
+    scale_y_continuous(limits = c(0, 10))  + # Adjust limits as needed
+    theme(legend.position = "none",
+      axis.title=element_text(face="bold", size=60),
+      axis.text=element_text(size=40, color="black"), 
+      strip.text.x=element_text(face="italic", size=40)) ; tot.chl
+
+
+```
+
+
+### Plot: Host Protein   
+
+View by timepoint   
+```{r}
+# Fit a mixed-effects model with 'patch' as a random effect
+model.host.prot <- lmer(host_prot_mg.cm2 ~ timepoint + (1|patch), data = master)
+qqPlot(residuals(model.totchl))
+
+# Residuals are not normally distributed. Attempt with log transformation.  
+totchl_model<-lmer(log(Total_Chl_cm2)~timepoint+(1|patch), data=master)
+qqPlot(residuals(totchl_model))
+
+# Identify the outliers
+outliers <- c(94,308)
+
+# remove outliers
+data_clean_tot <- master[-outliers, ]
+
+# Residuals are not normally distributed. Attempt with log transformation.  
+totchl_model<-lmer(log(Total_Chl_cm2)~timepoint+(1|patch), data=data_clean_tot)
+qqPlot(residuals(totchl_model))
+
+# Get the summary of the model
+summary(totchl_model)
+
+# Perform Type III ANOVA
+anova_result <- Anova(totchl_model, type = 3)
+
+# Post-hoc pairwise comparisons
+pairwise_results.tot <- emmeans(totchl_model, pairwise ~ timepoint, adjust = "tukey")
+
+# Generate letters for significant differences
+timepoint_cld_tot <- cld(pairwise_results.tot, Letters = letters)
+
+# Get the maximum value of cells.cm2
+max_tot <- max(master$Total_Chl_cm2, na.rm = TRUE)  # Make sure to handle any missing values
 
 # Make plot for host protein
 host_prot_cm2 <- master %>%
@@ -444,7 +502,6 @@ host_bio_cm2 <- master %>%
       axis.title=element_text(face="bold", size=60),
       axis.text=element_text(size=40, color="black"), 
       strip.text.x=element_text(face="italic", size=40)); host_bio_cm2
-
 
 
 ```
