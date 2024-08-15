@@ -3,6 +3,8 @@ title: "Gamete Abundance Analysis"
 author: "daniellembecker"
 date: "2024-03-31"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 This script will analyze gamete abundance in Acropora pulchra over time. The data is separated into timepointly timepoints and spermatogenesis and oogenesis.
@@ -14,8 +16,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library("tidyverse")
 library("gridExtra")
 library("ghibli")
+library("lme4")
+library("car")
 library("PNWColors")
 library("lubridate")
+library("lsmeans")
+library("multcomp")
 ```
 
 ## Load data & select specific columns 
@@ -42,6 +48,7 @@ df_relative_abundance$group <- paste0(df_relative_abundance$timepoint,"_", df_re
 # convert the Stage column in the df_relative_abundance dataframe to a factor with specified levels
 df_relative_abundance$Stage <- factor(df_relative_abundance$Stage, levels = c("Stage I","Stage II","Stage III","Stage IV", "Stage V"))
 
+
 ```
 
 # Plot Oogenesis abundance plots
@@ -61,7 +68,7 @@ oogen <- oogen_df_relative_abundance %>%
   geom_col() +
   facet_wrap(~ timepoint, ncol = 11) +
   theme_bw() +
-  ylab("Proportion of Oocytes") +
+  ylab("Relative Abundance of Oocytes") +
   xlab("Colony ID") +
   theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
         axis.text.y = element_text(size = 18),  # Increase size of y-axis text
@@ -80,11 +87,75 @@ oogen2 <- oogen +
 oogen2
 
 # save oogenesis plot
-ggsave("histology/output/oogenesis_abundance.pdf", oogen2 , width = 13, height = 8)
-ggsave("histology/output/oogenesis_abundance.jpg", oogen2 , width = 13, height = 8)
+ggsave("histology/output/oogenesis_abundance_percolony.png", oogen2 , width = 13, height = 8)
 
 
 ```
+
+# Plot relative abundance per stage per timepoint
+
+```{r}
+# Filter for oocytes and calculate total counts
+rel.abun <- abundance %>%
+  filter(gonad.type == "oocyte") %>%
+  count(site, timepoint, Stage, gonad.type, name = "stage_count") %>%
+  group_by(timepoint) %>%
+  mutate(grand_tots = sum(stage_count, na.rm = TRUE)) %>%
+  ungroup()
+
+# Calculate frequency for each stage
+rel.abun  <- rel.abun  %>%
+  mutate(freq = stage_count / grand_tots)
+
+# Ensure all stages including "No Data" are present
+rel_full <- rel.abun  %>%
+  complete(timepoint, Stage = c(levels(rel.abun$Stage), "No Data in Slides"), fill = list(freq = 0)) %>%
+  group_by(timepoint) %>%
+  mutate(freq = ifelse(is.na(freq), 0, freq)) %>%
+  ungroup()
+
+# Calculate the "No Data" frequency
+df_relative_abundance_with_no_data <- rel_full %>%
+  group_by(timepoint) %>%
+  mutate(freq_no_data = 1 - sum(freq[Stage != "No Data"], na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(freq = ifelse(Stage == "No Data", freq_no_data, freq)) %>%
+  select(timepoint, Stage, freq) %>%
+  distinct()
+
+# Reorder the levels of the 'timepoint' variable
+df_relative_abundance_with_no_data$timepoint <- factor(df_relative_abundance_with_no_data$timepoint, 
+                                           levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
+                                           ordered = TRUE)
+
+# Plot for Oocytes
+oocytes_plot <- df_relative_abundance_with_no_data %>%
+  ggplot(aes(x = timepoint, y = freq, fill = Stage)) +
+  geom_col(position = "stack") +  # Stack bars to show relative abundance
+  theme_bw() +
+  ylab("Relative Abundance of Oocytes") +
+  xlab("Timepoint") +
+  theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
+        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
+        legend.position = "top",
+        legend.title = element_blank(),
+        text = element_text(size = 18)) +  # Increase size of all other text elements
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 1)) +  # Adjust y-axis to range from 0 to 1
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +  # Wrap x-axis labels if needed
+  guides(fill = guide_legend(ncol = length(unique(df_relative_abundance_with_no_data$Stage)), byrow = TRUE))
+
+# Display the plot for oocytes
+print(oocytes_plot)
+
+# Save the oocytes plot
+ggsave("histology/output/oocytes_relative_abundance.png", oocytes_plot, width = 13, height = 8)
+
+
+
+```
+
+
+
 
 # Plot Spermatogenesis abundance plots
 ```{r}
@@ -102,7 +173,7 @@ spermato <- spermato_df_relative_abundance %>%
   geom_col() +
   facet_wrap(~ timepoint, ncol = 11) +
   theme_bw() +
-  ylab("Proportion of Spermatocytes") +
+  ylab("Relative Abundance of Spermatocytes") +
   xlab("Colony ID") +
   theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
         axis.text.y = element_text(size = 18),  # Increase size of y-axis text
@@ -121,24 +192,23 @@ spermato2 <- spermato +
 spermato2
 
 # save oogenesis plot
-ggsave("histology/output/spermatogenesis_abundance.pdf", spermato2 , width = 13, height = 8)
-ggsave("histology/output/spermatogenesis_abundance.jpg", spermato2 , width = 13, height = 8)
+ggsave("histology/output/spermatogenesis_abundance.png", spermato2 , width = 13, height = 8)
 
 
 
 ```
 
 
-# Plot Oogenesis size by replicate 
+# Conduct univariate analyses on change in size overtime for oogenesis and plot
 ```{r}
-
 # select for grand mean size dataframe
 oogen_size <- abundance %>%
-  dplyr::select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage) 
+  dplyr::select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage)
 
 # select just oocytes, remove any spermatocyte data
 oogen_size <- oogen_size %>%
-  filter(gonad.type != "spermatocyte")
+  filter(gonad.type != "spermatocyte")%>%
+  filter(geometric.mean != 0)
 
 # count number of oocytes per timmepoint for count on x axis
 oogen_size <- oogen_size %>%
@@ -151,182 +221,198 @@ oogen_size$timepoint <- factor(oogen_size$timepoint,
                                                  levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
                                                  ordered = TRUE)
 
-# Calculate mean oocyte size per month per replicate
-mean_size <- oogen_size %>%
-  group_by(timepoint, replicate_id, count) %>%
-  summarise(mean_size = mean(geometric.mean, na.rm = TRUE))
-
-# Plot with reordered months and size and by replicate
-oogen.size.plot <- mean_size %>% 
-  ggplot(aes(x = replicate_id, y = mean_size)) +
-  geom_col() +
-  facet_wrap(~ timepoint, ncol = 11) +
-  theme_bw() +
-  ylab("Oocyte Diameter (microns)") +
-  xlab("Colony ID") +
-  theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
-        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
-        legend.position = "top",
-        legend.title = element_blank(),
-        text = element_text(size = 18)) +  # Increase size of all other text elements
-  ylab(expression("Mean oocyte diameter ("*mu*"m)")) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 400)) + # Ensure the y-axis starts at 0
-  guides(fill = guide_legend(ncol = length(unique(oogen_size$Stage)), byrow = TRUE))  # Set ncol and byrow for the legend # Remove legend titles
-
-oogen.size.plot
-
-# Add count value on the x-axis
-oogen.size.plot2 <- oogen.size.plot +
-  geom_text(aes(x = replicate_id, y = 0, label = count), vjust = -0.5, size = 5, color = "black")
-
-oogen.size.plot2
-
-# save oogenesis size plots
-ggsave("histology/output/oogenesis_size.pdf", oogen.size.plot2 , width = 13, height = 8)
-ggsave("histology/output/oogenesis_size.jpg", oogen.size.plot2 , width = 13, height = 8)
-
-
-```
-
-# Plot oogenesis mean size by month
-
-```{r}
-# Calculate mean oocyte size per month per replicate
+# Calculate mean oocyte size per month per replicate (keep this step as needed for other purposes)
 mean_size_month <- oogen_size %>%
   group_by(timepoint) %>%
   summarise(mean_size = mean(geometric.mean, na.rm = TRUE),
             std_error = sd(geometric.mean, na.rm = TRUE) / sqrt(n())) 
 
-# Abbreviate month names
-mean_size_month$abbreviated_timepoint <- month.abb[match(mean_size_month$timepoint, month.name)]
+# compare if colony_id as random effect improves model
+# Model with colony as a random effect
+model_with_colony <- lmer(geometric.mean ~ timepoint + (1 | colony_id), data = oogen_size)
 
-# Reorder the levels of the 'timepoint' variable from December to October
-mean_size_month$abbreviated_timepoint <- factor(mean_size_month$abbreviated_timepoint, 
-                                        levels = c("Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"), ordered = TRUE)
+# Model without colony as a random effect
+model_without_colony <- lm(geometric.mean ~ timepoint, data = oogen_size)
 
-#use PNW color palette
-pal <- pnw_palette("Moth",12)
+# run commparisons for AIC and BIC values
+AIC(model_with_colony, model_without_colony)
+BIC(model_with_colony, model_without_colony)
+#model with colony as a random effect has both a lower AIC and BIC compared to the model without colony as a random effect, include colony_id
 
-# Plot with Studio Ghibli color palette
-oogen.size.month <- mean_size_month %>% 
-  ggplot(aes(x = abbreviated_timepoint, y = mean_size)) +
-  geom_col() +
-  geom_errorbar(aes(ymin = mean_size - std_error, ymax = mean_size + std_error), width = 0.2, color = "black") +  # Add error bars
-  #scale_fill_manual(values=pal)  + #specify PNW colors
-  theme_classic() +
-  ylab("Oocyte Diameter (microns)") +
-  xlab("Timepoint") +
-  theme(axis.text.x = element_text(angle = 0, size = 18),  # Increase size of x-axis text
-        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
-        legend.position = "none",  # Remove legend
-        text = element_text(size = 18)) +  # Increase size of all other text elements
-  ylab(expression("Mean oocyte diameter ("*mu*"m)")) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 410))
+# Fit a mixed-effects model with 'patch' as a random effect
+model.oogen <- lmer(geometric.mean ~ timepoint + (1 | colony_id), data = oogen_size)
+qqPlot(residuals(model.oogen))
 
-oogen.size.month
+# Residuals are not normally distributed. Attempt with log transformation.  
+model.oogen <-lmer(log(geometric.mean) ~ timepoint + (1 | colony_id), data = oogen_size)
+qqPlot(residuals(model.oogen))
 
-# save oogenesis size per month plots
-ggsave("histology/output/oogen.size.month.pdf", oogen.size.month , width = 13, height = 8)
-ggsave("histology/output/oogen.size.month.jpg", oogen.size.month , width = 13, height = 8)
+# Identify the outliers
+outliers <- c(52,53)
 
-# select only month and temperature for temp data (environmental script must be run first)
-temperature <- mean_monthly_data %>% 
-  dplyr::select(month, mean_temp) 
+# remove outliers
+data_clean_oogen <- oogen_size[-outliers, ]
 
-# Rename month to timepoint to overlay with plot
-temperature <- temperature %>%
-  rename(timepoint = month)
+# Residuals are not normally distributed. Attempt with log transformation.  
+model.oogen <-lmer(log(geometric.mean) ~ timepoint + (1 | colony_id), data = data_clean_oogen)
+qqPlot(residuals(model.oogen))
 
-# Calculate temp_adjustment
-temp_adjustment <- (29 - 26) / (max(temperature$mean_temp) - min(temperature$mean_temp))
+# Get the summary of the model
+summary(model.oogen)
 
-# Plot with temperature overlay and dual y-axis
-oogen.size.temp <- oogen.size.month + 
-  geom_line(data = temperature, aes(x = timepoint, y = (mean_temp - 26) * 384 / 3 + 26, color = "Temperature", group = 1)) +
-  geom_point(data = temperature, aes(x = timepoint, y = (mean_temp - 26) * 384 / 3 + 26, color = "Temperature")) +
-  scale_color_manual(values = c("Temperature" = "black")) +  # Adjust color if needed
-  theme(axis.text.x = element_text(angle = 0, size = 18),  # Increase size of x-axis text
-        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
-        legend.position = "none",  # Remove legend
-        text = element_text(size = 18)) +  # Increase size of all other text elements
-  scale_y_continuous(sec.axis = sec_axis(~ (. - 26) / 384 * 3 + 26, name = "Temperature (°C)"), expand = c(0, 0), limits = c(0, 410))
+# Perform Type III ANOVA
+anova_result <- Anova(model.oogen, type = 3)
+anova_result
 
-oogen.size.temp
+# Post-hoc pairwise comparisons
+pairwise_results.oogen <- emmeans(model.oogen, pairwise ~ timepoint, adjust = "tukey")
 
-# save oogenesis size plots with temperature overlayed
-ggsave("histology/output/oogen.size.temp.pdf", oogen.size.temp , width = 13, height = 8)
-ggsave("histology/output/oogen.size.temp.jpg", oogen.size.temp , width = 13, height = 8)
+# Generate letters for significant differences
+timepoint_cld_oogen <- cld(pairwise_results.oogen, Letters = letters)
+
+# Get the maximum value of cells.cm2
+max_oogen <- max(oogen_size$geometric.mean, na.rm = TRUE)  # Make sure to handle any missing values
+
+# Make oogenesis plot
+oogen <- oogen_size %>%
+  ggplot(aes(x = timepoint, y = geometric.mean, fill = timepoint)) +
+    geom_boxplot(color = "black", fill = "white", alpha = 0.2) +
+    geom_point(pch = 21, size = 2, position = position_jitterdodge(0.2)) +
+    ylim(0, 400) +
+    geom_text(data = timepoint_cld_oogen, aes(label = .group, x = timepoint, y = 1.0 * max_oogen), vjust = -0.5, size = 14, color = "black") +
+    ylab(expression(bold(paste("Oocyte Diameter (", mu, "m)")))) +  # Updated label
+    xlab("Timepoint") +
+    theme_classic() + 
+    theme(
+      legend.position = "none",
+      axis.title = element_text(face = "bold", size = 30),
+      axis.text = element_text(size = 30, color = "black"),
+      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),  # Rotate x-axis labels
+      strip.text.x = element_text(face = "italic", size = 30)); oogen
+
+# Save the plot as an image
+ggsave("histology/output/oogen.size.month.boxplot.png", oogen, width = 13, height = 8)
 
 
 
 ```
 
 
-# Plot Spermatogenesis size plots
+# Conduct univariate analyses and plot spermary change per month
 ```{r}
-# select for grand mean size dataframe
-spermato_size <- abundance %>%
-  dplyr::select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage) 
+# Select for grand mean size dataframe
+sperm_size <- abundance %>%
+  dplyr::select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage)
 
-# select just oocytes, remove any spermatocyte data
-spermato_size <- spermato_size %>%
-  filter(gonad.type != "oocyte")
+# Select just spermatocytes, remove any oocyte data, and filter out zero values
+sperm_size <- sperm_size %>%
+  filter(gonad.type == "spermatocyte") %>%
+  filter(geometric.mean != 0)
 
-# group by colony id and timepoint
-spermato_size <- spermato_size %>%
+# Count number of spermatocytes per timepoint for count on x-axis
+sperm_size <- sperm_size %>%
   group_by(colony_id, timepoint) %>%
   mutate(count = if (all(is.na(geometric.mean) | geometric.mean == 0)) 0 else n()) %>%
   ungroup()
 
-
 # Reorder the levels of the 'timepoint' variable from December to October
-spermato_size$timepoint <- factor(spermato_size$timepoint, 
-                                                 levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
-                                                 ordered = TRUE)
+sperm_size$timepoint <- factor(sperm_size$timepoint, 
+                               levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
+                               ordered = TRUE)
 
-# Calculate mean spermatocyte size per month
-mean_size_sperm <- spermato_size %>%
-  group_by(timepoint, replicate_id, count) %>%
-  summarise(mean_size = mean(geometric.mean, na.rm = TRUE))
+# Calculate mean spermatocyte size per month per replicate (keep this step as needed for other purposes)
+mean_size_month_sperm <- sperm_size %>%
+  group_by(timepoint) %>%
+  summarise(mean_size = mean(geometric.mean, na.rm = TRUE),
+            std_error = sd(geometric.mean, na.rm = TRUE) / sqrt(n())) 
 
-# Plot with reordered months and size
-sperm.size.plot <- mean_size_sperm %>% 
-  ggplot(aes(x = replicate_id, y = mean_size)) +
-  geom_col() +
-  facet_wrap(~ timepoint, ncol = 11) +
-  theme_bw() +
-  ylab("Spermatocyte Diameter (microns)") +
-  xlab("Colony ID") +
-  theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
-        axis.text.y = element_text(size = 18),  # Increase size of y-axis text
-        legend.position = "top",
-        legend.title = element_blank(),
-        text = element_text(size = 18)) +  # Increase size of all other text elements
-  ylab(expression("Mean spermatocyte diameter ("*mu*"m)")) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) + # Ensure the y-axis starts at 0
-  guides(fill = guide_legend(ncol = length(unique(spermato_size$Stage)), byrow = TRUE))  # Set ncol and byrow for the legend # Remove legend titles
+# Compare if colony_id as random effect improves model
+# Model with colony as a random effect
+model_with_colony <- lmer(geometric.mean ~ timepoint + (1 | colony_id), data = sperm_size)
 
-sperm.size.plot
+# Model without colony as a random effect
+model_without_colony <- lm(geometric.mean ~ timepoint, data = sperm_size)
 
-# Add count value on the x-axis
-sperm.size.plot2 <- sperm.size.plot +
-  geom_text(aes(x = replicate_id, y = 0, label = count), vjust = -0.5, size = 5, color = "black")
+# Run comparisons for AIC and BIC values
+AIC(model_with_colony, model_without_colony)
+BIC(model_with_colony, model_without_colony)
+# Model with colony as a random effect has both a lower AIC and BIC compared to the model without colony as a random effect, include colony_id
 
-sperm.size.plot2
+# Fit a mixed-effects model with 'colony_id' as a random effect
+model.sperm <- lmer(geometric.mean ~ timepoint + (1 | colony_id), data = sperm_size)
+qqPlot(residuals(model.sperm))
 
-# save oogenesis size plots
-ggsave("histology/output/sperm_size.pdf", sperm.size.plot2 , width = 13, height = 8)
-ggsave("histology/output/sperm_size.jpg", sperm.size.plot2 , width = 13, height = 8)
+# Residuals are not normally distributed. Attempt with log transformation.
+model.sperm <- lmer(log(geometric.mean) ~ timepoint + (1 | colony_id), data = sperm_size)
+qqPlot(residuals(model.sperm))
 
+# Identify the outliers
+outliers <- c(34,35)  # Adjust as necessary based on actual data
+
+# Remove outliers
+data_clean_sperm <- sperm_size[-outliers, ]
+
+# Residuals are not normally distributed. Attempt with log transformation.
+model.sperm <- lmer(log(geometric.mean) ~ timepoint + (1 | colony_id), data = data_clean_sperm)
+qqPlot(residuals(model.sperm))
+
+# Get the summary of the model
+summary(model.sperm)
+
+# Perform Type III ANOVA
+anova_result_sperm <- Anova(model.sperm, type = 3)
+anova_result_sperm
+
+# Post-hoc pairwise comparisons
+pairwise_results_sperm <- emmeans(model.sperm, pairwise ~ timepoint, adjust = "tukey")
+
+# Generate letters for significant differences
+timepoint_cld_sperm <- cld(pairwise_results_sperm, Letters = letters)
+
+# Get the maximum value of geometric.mean
+max_sperm <- max(sperm_size$geometric.mean, na.rm = TRUE)  # Make sure to handle any missing values
+
+# Make spermatocyte plot
+sperm <- sperm_size %>%
+  ggplot(aes(x = timepoint, y = geometric.mean, fill = timepoint)) +
+    geom_boxplot(color = "black", fill = "white", alpha = 0.2) +
+    geom_point(pch = 21, size = 2, position = position_jitterdodge(0.2)) +
+    ylim(0, 120) +
+    geom_text(data = timepoint_cld_sperm, aes(label = .group, x = timepoint, y = 1.0 * max_sperm), vjust = -0.5, size = 14, color = "black") +
+    ylab(expression(bold(paste("Spermatocyte Diameter (", mu, "m)")))) +  # Updated label
+    xlab("Timepoint") +
+    theme_classic() + 
+    theme(
+      legend.position = "none",
+      axis.title = element_text(face = "bold", size = 30),
+      axis.text = element_text(size = 30, color = "black"),
+      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),  # Rotate x-axis labels
+      strip.text.x = element_text(face = "italic", size = 30)); sperm
+
+# Save the plot as an image
+ggsave("histology/output/sperm.size.month.boxplot.png", sperm, width = 13, height = 8)
 
 ```
 
 
-# Arrange and save size plots
 ```{r}
-# save oogenesis plot
+# Calculate mean and standard error for oocytes
+oocyte_summary <- oogen_size %>%
+  group_by(timepoint) %>%
+  summarise(
+    mean_size = mean(geometric.mean, na.rm = TRUE),
+    std_error = sd(geometric.mean, na.rm = TRUE) / sqrt(n()))
 
-#plots <- grid.arrange(oogen, spermato, nrow = 2)
+# Calculate mean and standard error for spermatocytes
+spermatocyte_summary <- sperm_size %>%
+  group_by(timepoint) %>%
+  summarise(
+    mean_size = mean(geometric.mean, na.rm = TRUE),
+    std_error = sd(geometric.mean, na.rm = TRUE) / sqrt(n()))
 
-
+# Print summaries
+print(oocyte_summary)
+print(spermatocyte_summary)
 ```
+
+
