@@ -306,7 +306,7 @@ ACR-429,Stage II,110.998,76.543,92.17439945,oocyte,8,mahana,May,Rep7,ACR429_2022
 ACR-429,Stage II,99.888,78.454,88.52464714,oocyte,8,mahana,May,Rep7,ACR429_20220515,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-429,Stage II,144.444,112.321,127.3738377,oocyte,8,mahana,May,Rep7,ACR429_20220515,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-429,Stage II,149.876,120.222,134.2326058,oocyte,8,mahana,May,Rep7,ACR429_20220515,P2,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-417,Stage II,161.224,119.355,138.7187461,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-417,Stage V,426.232,308.765,362.7747558,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-425,Stage III,178.765,154.977,166.4465782,oocyte,7,mahana,April,Rep2,ACR425_20220414,P3,"22,14",3.6525,microns,
 ACR-425,Stage III,181.234,160.599,170.6048041,oocyte,7,mahana,April,Rep2,ACR425_20220414,P3,"22,14",3.6525,microns,
 ACR-425,Stage III,184.565,110.999,143.1311651,oocyte,7,mahana,April,Rep2,ACR425_20220414,P3,"22,14",3.6525,microns,
@@ -510,18 +510,18 @@ ACR-431,Stage III,180.998,160.778,170.5886762,oocyte,8,mahana,May,Rep2,ACR431_20
 ACR-431,Stage III,176.554,140.998,157.7775678,oocyte,8,mahana,May,Rep2,ACR431_20220515,P4,"22,14",3.6525,microns,
 ACR-431,Stage III,177.776,130.887,152.5403793,oocyte,8,mahana,May,Rep2,ACR431_20220515,P4,"22,14",3.6525,microns,
 ACR-459,Stage III,51.323,41.866,46.3539504,spermatocyte,7,mahana,October,Rep1,ACR459_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-417,Stage III,398.776,200.433,282.7151747,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-417,Stage III,410.876,203.45,289.1240602,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-417,Stage III,411.223,210.333,294.0982272,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-417,Stage III,398.707,219.334,295.7194636,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-417,Stage III,399.765,210.887,290.3536491,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-417,Stage III,410.998,215.667,297.7225313,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-417,Stage III,400.876,234.556,306.6396436,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-417,Stage III,467.887,237.889,333.6242955,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-420,Stage III,287.345,230.333,257.2645251,oocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-420,Stage III,290.888,245.654,267.3159194,oocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-458,Stage III,298.776,190.443,238.5367849,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
-ACR-458,Stage III,343.776,170.889,242.3789118,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-417,Stage IV,398.776,200.433,282.7151747,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-417,Stage IV,410.876,203.45,289.1240602,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-417,Stage IV,411.223,210.333,294.0982272,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-417,Stage IV,398.707,219.334,295.7194636,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-417,Stage IV,399.765,210.887,290.3536491,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-417,Stage IV,410.998,215.667,297.7225313,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-417,Stage IV,400.876,234.556,306.6396436,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-417,Stage V,467.887,237.889,333.6242955,oocyte,8,mahana,October,Rep1,ACR417_20221015,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-420,Stage IV,287.345,230.333,257.2645251,oocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-420,Stage IV,290.888,245.654,267.3159194,oocyte,8,mahana,September,Rep1,ACR420_20220914,P3,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
+ACR-458,Stage IV,298.776,190.443,238.5367849,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
+ACR-458,Stage IV,343.776,170.889,242.3789118,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
 ACR-458,Stage III,298.331,154.292,214.5462343,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
 ACR-458,Stage III,356.778,150.667,231.8505357,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,
 ACR-458,Stage III,370.889,143.221,230.475798,oocyte,10,mahana,September,Rep2,ACR458_20220914,P5,"22,14",3.6525,microns,

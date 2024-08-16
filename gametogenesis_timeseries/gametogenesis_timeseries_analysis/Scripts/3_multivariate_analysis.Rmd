@@ -54,6 +54,7 @@ library(RColorBrewer)
 library(lme4)
 library(lmerTest)
 library(car)
+library(lubridate)
 library(effects)
 library(ggfortify)
 library(cowplot)
@@ -69,418 +70,349 @@ library(pairwiseAdonis)
 
 # Load dataframe
 
-Load in master dataframe generated from 1_assemble_data.Rmd.  
+Load in master data frames for environmental, physiological, and reproductive data 
 ```{r}
-master<-read.csv("gametogenesis_timeseries_analysis/Output/master_timeseries.csv")
+master<-read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/master_timeseries.csv")
 ```
 
-# Rename columns for phys data
+# Aggregate and rename physioloigcal data
 ```{r}
-phys_data <-master%>%
-   dplyr::select(colony_id, timepoint, Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Total_Chl_cm2, host_prot_mg.cm2, holobiont_prot_mg.cm2, cells.cm2, chla.ug.cm2, chlc2.ug.cm2)%>%
-  filter(Host_AFDW.mg.cm2>0)%>%
-  filter(Sym_AFDW.mg.cm2>0)%>%
-  dplyr::rename(Host_Biomass=Host_AFDW.mg.cm2, Symbiont_Biomass=Sym_AFDW.mg.cm2, Symbiont_Density=cells.cm2, Host_Protein=host_prot_mg.cm2, Holobiont_Protein=holobiont_prot_mg.cm2, Total_Chlorophyll=Total_Chl_cm2, Chlorophylla = chla.ug.cm2, Chlorophyllc2 = chlc2.ug.cm2)
+# Assuming phys_data is already filtered and renamed correctly
+phys_data <- master %>%
+  dplyr::select(colony_id, timepoint, Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Total_Chl_cm2, host_prot_mg.cm2, holobiont_prot_mg.cm2, cells.cm2) %>%
+  filter(Host_AFDW.mg.cm2 > 0) %>%
+  filter(Sym_AFDW.mg.cm2 > 0) %>%
+  dplyr::rename(
+    Host_Biomass = Host_AFDW.mg.cm2,
+    Symbiont_Biomass = Sym_AFDW.mg.cm2,
+    Symbiont_Density = cells.cm2,
+    Host_Protein = host_prot_mg.cm2,
+    Holobiont_Protein = holobiont_prot_mg.cm2,
+    Total_Chlorophyll = Total_Chl_cm2)
 
+# Ensure timepoint is a factor with appropriate levels
+phys_data$timepoint <- factor(phys_data$timepoint, levels = unique(phys_data$timepoint))
+
+# Calculate IQR for Total_Chlorophyll due to outliers
+Q1 <- quantile(phys_data$Total_Chlorophyll, 0.25, na.rm = TRUE)
+Q3 <- quantile(phys_data$Total_Chlorophyll, 0.75, na.rm = TRUE)
+IQR <- Q3 - Q1
+
+# Define bounds for outliers
+lower_bound <- Q1 - 1.5 * IQR
+upper_bound <- Q3 + 1.5 * IQR
+
+# Remove outliers
+phys_data_cleaned <- phys_data %>%
+  filter(Total_Chlorophyll >= lower_bound & Total_Chlorophyll <= upper_bound)
+
+# Remove August ACR-426 datapoint from the cleaned data for host protein due to outlier
+phys_data_cleaned <- phys_data_cleaned %>%
+  filter(!(timepoint == "AUGUST" & colony_id == "ACR-426"))
+
+# Calculate mean, se and SD per timepoint
+summary_data <- do.call(rbind, by(phys_data_cleaned, phys_data_cleaned$timepoint, function(x) {
+  n <- nrow(x)  # Sample size
+  
+  calculate_stats <- function(var) {
+    mean_val <- mean(var, na.rm = TRUE)
+    sd_val <- sd(var, na.rm = TRUE)
+    se_val <- sd_val / sqrt(n)
+    return(c(mean = mean_val, sd = sd_val, se = se_val))}
+  
+  stats_list <- list(
+    Host_Biomass = calculate_stats(x$Host_Biomass),
+    Symbiont_Biomass = calculate_stats(x$Symbiont_Biomass),
+    Total_Chlorophyll = calculate_stats(x$Total_Chlorophyll),
+    Host_Protein = calculate_stats(x$Host_Protein),
+    Holobiont_Protein = calculate_stats(x$Holobiont_Protein),
+    Symbiont_Density = calculate_stats(x$Symbiont_Density))
+  
+  result <- data.frame(timepoint = unique(x$timepoint))
+  for (var in names(stats_list)) {
+    result[[paste0(var, "_mean")]] <- stats_list[[var]]["mean"]
+    result[[paste0(var, "_sd")]] <- stats_list[[var]]["sd"]
+    result[[paste0(var, "_se")]] <- stats_list[[var]]["se"]}
+  
+  return(result)}))
+
+# Convert row names to a column if needed
+summary_data$timepoint <- rownames(summary_data)
+rownames(summary_data) <- NULL
+
+# Set the timepoint factor levels in the correct order
+summary_data$timepoint <- factor(summary_data$timepoint, 
+                                  levels = c("JANUARY", "FEBRUARY", "MARCH", 
+                                             "APRIL", "MAY", "JUNE", 
+                                             "JULY", "AUGUST", "SEPTEMBER", 
+                                             "OCTOBER"))
 ```
 
 # Load in histological data
-Select only colony_id, timepoint, Stage, geometric_mean, and gonad.type
 ```{r}
 #load histo data
-histo.data <- read.csv("../histology/data/histological_data.csv")
-
-#Select only colony_id, timepoint, Stage, geometric_mean, and gonad.type
-repo_data <- histo.data%>%
-   dplyr::select(colony_id, timepoint, Stage, geometric.mean, gonad.type) %>%
-   na.omit
-
-#rename gonad.type information
-repo_data <- repo_data %>%
-  mutate(gonad.type = case_when(
-    gonad.type == "oocyte" ~ "oocyte_size",
-    gonad.type == "spermatocyte" ~ "spermary_size",
-    TRUE ~ gonad.type))  # This keeps any other values unchanged
+oogen_abundance <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oocyte_abun_data.csv")[-1]
   
-# Transform data from long to wide format
-# Pivot data from long to wide format
-repo_wide_data <- repo_data %>%
-  pivot_wider(names_from = gonad.type, values_from = geometric.mean)
+sperm_abundance <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_abun_data.csv")[-1]
 
-# Function to unnest with filling NA values
-unnest_with_na <- function(df, col) {
-  max_length <- max(map_int(df[[col]], length))
-  df %>%
-    mutate(!!col := map(!!sym(col), ~ c(.x, rep(NA, max_length - length(.x))))) %>%
-    unnest(!!sym(col))
-}
-
-# Transform data to long format
-repo_transform_data <- repo_wide_data %>%
-  mutate(
-    timepoint = toupper(timepoint),  # Capitalize timepoint
-    oocyte_size = map(oocyte_size, ~ if (is.null(.x)) NA_real_ else .x),
-    spermary_size = map(spermary_size, ~ if (is.null(.x)) NA_real_ else .x)) %>%
-  rowwise() %>%
-  mutate(max_length = max(length(oocyte_size), length(spermary_size))) %>%
-  ungroup() %>%
-  mutate(
-    oocyte_size = map2(oocyte_size, max_length, ~ c(.x, rep(NA, .y - length(.x)))),
-    spermary_size = map2(spermary_size, max_length, ~ c(.x, rep(NA, .y - length(.x))))
-  ) %>%
-  select(-max_length) %>%
-  unnest(c(oocyte_size, spermary_size)) %>%
-  # Remove rows where both oocyte_size and spermary_size are NA
-  filter(!is.na(oocyte_size) | !is.na(spermary_size))
-
-
+oogen_size <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oogen_size_data.csv")[-1]
+  
+sperm_size <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_size_data.csv")[-1]
 
 ```
 
 # Load in light and temperature data
 ```{r}
-light.dat <- read.csv("../RAnalysis/output/environmental/mahana_light_data.csv")[, -1]
+light.dat <- read.csv("RAnalysis/output/environmental/mahana_light_data.csv")[, -1]
 
-temp.dat <- read.csv("../RAnalysis/output/environmental/20240129_mahana_temp_data.csv")[, -1]
-
-# Separate date and time from the "date.temp" column
-temp.dat.sep <- temp.dat %>%
-  separate(date.time, into = c("Date", "Time"), sep = " ")
-
-# remove logger column
-temp.data <- temp.dat.sep %>%
-  select(-logger.number)
-
-light.data <- light.dat %>%
-  select(-logger)
-
-# left join into environmental data
-environ.dat <- left_join(light.data, temp.data)
-
-# Rename the 'calibrated' column to 'light'
-environ.dat <- environ.dat %>%
-  dplyr::rename(light = calibrated)
-
-# create a timepoint column that corresponds to the month name from the Date column
-environ.data <- environ.dat %>%
-  mutate(
-    Date = ymd(Date),  # Ensure Date is in proper date format
-    timepoint = toupper(month(Date, label = TRUE, abbr = FALSE)))
-
-# remove date and time, just have timepoint light and temp for cor plot
-environ.filt <- environ.data %>%
-  select(-Date, -Time)
+temp.dat <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/mean_temp_data.csv")[, -1]
 
 ```
 
-# Combine environmental, reproductive, and physiological data frames by timepoint
+Create downstream plots to use in fully combined figure
+Smoothed temperature plot
 ```{r}
-all.data <- full_join(repo_transform_data, phys_data)
-```
+# Convert date.time to POSIXct format
+temp.dat$date.time <- as.POSIXct(temp.dat$date.time, format="%Y-%m-%d %H:%M", tz="UTC")
 
-# Correlation Analysis for reproductive and physiological data
-```{r}
-# Prepare the data for correlation analysis
-cor.df.phys.repo <- all.data %>% dplyr::select(4:13) 
+# Smoothed temperature plot across time
+temp_summary_plot <- temp.dat %>%
+  ggplot(., aes(x=date.time, y= temp)) + 
+  geom_point(colour="gray", size=0.5, alpha=0.05) + 
+  geom_smooth(aes(), se=FALSE, method="gam", colour = "black") + 
+  ylab("Temperature °C") + 
+  xlab("Date") +
+  scale_x_datetime(date_breaks = "1 months", date_labels = "%b %Y")+
+  theme_classic() + 
+  theme(
+    text=element_text(size=14, colour="black"), 
+    axis.title=element_text(size=18, colour="black", face="bold"), 
+    axis.text.x=element_text(size=14, colour="black", angle=45, hjust=1, vjust=1),
+    legend.title=element_text(size=18, colour="black", face="bold")) +
+      ylim(25, 30);temp_summary_plot
 
-# Calculate the correlation matrix, keeping NA values
-cor_matrix_phys_repo <- cor(cor.df.phys.repo, use = "pairwise.complete.obs")
-
-# Save the correlation matrix plot as a PNG file with the absolute path
-png(file = "gametogenesis_timeseries_analysis/Figures/correlation-matrix-phys-repo.png", height = 1400, width = 1400)
-corrplot(cor_matrix_phys_repo, 
-         addCoef.col = "black", # Specify color for coefficients
-         number.cex = 1.3, 
-         cl.cex = 2.5, 
-         tl.col = "black", 
-         tl.cex = 2,
-         na.label = "NA")  # This will show "NA" for missing correlations
-dev.off()
-
-# Display the correlation matrix plot without saving it
-corrplot(cor_matrix_phys_repo, 
-         tl.col = "black", 
-         method = 'circle', 
-         col = colorRampPalette(c("red", "white", "blue"))(200), 
-         order = 'FPC', 
-         type = 'lower', 
-         diag = FALSE,
-         na.label = "NA")  # This will show "NA" for missing correlations
-```
-
-# Correlation Analysis for environmental data
-```{r}
-# Prepare the data for correlation analysis
-cor.df.environ <- environ.filt %>% dplyr::select(1:2) 
-
-# Calculate the correlation matrix, keeping NA values
-cor_matrix_environ <- cor(cor.df.environ, use = "pairwise.complete.obs")
-
-# Save the correlation matrix plot as a PNG file with the absolute path
-png(file = "gametogenesis_timeseries_analysis/Figures/correlation-matrix-environ.png", height = 1400, width = 1400)
-corrplot(cor_matrix_environ, 
-         addCoef.col = "black", # Specify color for coefficients
-         number.cex = 1.3, 
-         cl.cex = 2.5, 
-         tl.col = "black", 
-         tl.cex = 2,
-         na.label = "NA")  # This will show "NA" for missing correlations
-dev.off()
-
-# Display the correlation matrix plot without saving it
-corrplot(cor_matrix_environ, 
-         tl.col = "black", 
-         method = 'circle', 
-         col = colorRampPalette(c("red", "white", "blue"))(200), 
-         order = 'FPC', 
-         type = 'lower', 
-         diag = FALSE,
-         na.label = "NA")  # This will show "NA" for missing correlations
 ```
 
 
-# Aggregate data by timmepoint to compare with environmental 
+Smoothed light plot 
 ```{r}
-# Step 2: Aggregate the physiological and reproductive data
-phys_repo_agg <- all.data %>%
-  dplyr::group_by(timepoint) %>%
-  summarise_if(is.numeric, ~mean(.x, na.rm = TRUE)) %>%
-  ungroup()
+# Combine Date and Time columns into a new column named DateTime
+light.dat$DateTime <- with(light.dat, ymd_hms(paste(Date, Time)))
 
-# Step 3: Merge the datasets
-combined_data <- environ.data%>%
-  full_join(phys_repo_agg, by = "timepoint")
+light_summary_plot <- light.dat %>%
+  ggplot(., aes(x = DateTime, y = calibrated)) + 
+  geom_point(colour = "darkgray", size = 0.5, alpha = 0.05) + 
+  geom_smooth(aes(), se = FALSE, colour = "black") + 
+  ylab(expression("Mean Light Intensity " * (mu*mol~m^{-2}~s^{-1}))) +
+  xlab("Date") +
+  scale_x_datetime(date_breaks = "1 months", date_labels = "%b %Y") +
+  theme_classic() + 
+  theme(
+    text = element_text(size = 12, colour = "black"), 
+    axis.title = element_text(size = 14, colour = "black", face = "bold"), 
+    axis.text.x = element_text(size = 10, colour = "black", angle = 45, hjust = 1, vjust = 1),
+    legend.title = element_text(size = 14, colour = "black", face = "bold")) +
+    scale_y_continuous(expand = c(0, 0)) +
+    coord_cartesian(ylim = c(1000, 6000));light_summary_plot
 
-# Step 4: Create the correlation plot
-cor_matrix_all <- cor(combined_data %>% select(where(is.numeric)), use = "pairwise.complete.obs")
-
-# Save the correlation matrix plot as a PNG file with the absolute path
-png(file = "gametogenesis_timeseries_analysis/Figures/correlation-matrix-all.png", height = 1400, width = 1400)
-corrplot(cor_matrix_all, 
-         addCoef.col = "black", # Specify color for coefficients
-         number.cex = 1.3, 
-         cl.cex = 2.5, 
-         tl.col = "black", 
-         tl.cex = 2,
-         na.label = "NA")  # This will show "NA" for missing correlations
-dev.off()
-
-# Display the correlation matrix plot without saving it
-corrplot(cor_matrix_all, 
-         tl.col = "black", 
-         method = 'circle', 
-         col = colorRampPalette(c("red", "white", "blue"))(200), 
-         order = 'FPC', 
-         type = 'lower', 
-         diag = FALSE,
-         na.label = "NA")  # This will show "NA" for missing correlations
 ```
 
-
-Set seed for permutation tests (randomly picked). 
+Physiological variable plots
+Symbiont densities
 ```{r}
-set.seed(2534)
-```
-
-# Build trajectory PCA plots  
-
-## Holobiont Responses 
-
-### PCA's for centroid and trajectories for all phys metrics and all sizes for last four months
-```{r}
-# need to remove spermary size from this as it filters out for only the last four months
-data.subset <- all.data 
-
-# make only complete cases for pca data
-pca_data <-data.subset[complete.cases(data.subset), ]
-
-# Standardize the data
-pca_data[,-c(1:3)]<-log(pca_data[,-c(1:3)]+1)
-pca_data[,-c(1:3)]<- (pca_data[,-c(1:3)]+0.001)
-
-# Standardize the data
-scaled_pca_data <-prcomp(pca_data[c(4:13)], scale=TRUE, center=TRUE) 
-
-# Extract PC scores
-pca_scores <- as.data.frame(scaled_pca_data$x)
-
-# Extract timepoint info
-pca_info<-pca_data[c(2)]
-
-# Add back the non-numeric columns
-pca_scores$timepoint <- pca_info$timepoint
-
-# Create a data frame for variable loadings (arrows)
-loadings <- as.data.frame(scaled_pca_data$rotation)
-loadings$variable <- row.names(loadings)
-
-# Create the PCA plot with arrows
-PCA_four_months <- ggplot(pca_scores, aes(x = PC1, y = PC2)) +
-  geom_point(aes(color = timepoint), size = 3) +
-  geom_segment(data = loadings, aes(x = 0, y = 0, xend = PC1*5, yend = PC2*5),
-               arrow = arrow(length = unit(0.2, "cm")), color = "black") +
-  geom_text_repel(data = loadings, aes(x = PC1*5, y = PC2*5, label = variable),
-                  color = "black", size = 3) +
+# Symbiont densities plot
+sym <- ggplot(summary_data, aes(x = timepoint, y = Symbiont_Density_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Symbiont_Density_mean - Symbiont_Density_se, ymax = Symbiont_Density_mean + Symbiont_Density_se), width = 0.2, color = "black") +
+  xlab("") +
+  ylab(expression(bold(paste("Symbiont Densities cm"^-2)))) +
   theme_minimal() +
-  labs(x = paste0("PC1 (", round(summary(scaled_pca_data)$importance[2,1]*100, 1), "%)"),
-       y = paste0("PC2 (", round(summary(scaled_pca_data)$importance[2,2]*100, 1), "%)"));PCA_four_months
-
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))
 
 ```
 
-
-
-### PCA's for centroid and trajectories for all phys metrics and oocyte size 
+Chlorophyll plot
 ```{r}
-# need to remove spermary size from this as it filters out for only the last four months
-data.subset_oocyte <- all.data %>% select(-spermary_size)
-
-# make only complete cases for pca data
-pca_data_oocyte <-data.subset_oocyte[complete.cases(data.subset_oocyte), ]
-
-# Standardize the data
-pca_data_oocyte[,-c(1:3)]<-log(pca_data_oocyte[,-c(1:3)]+1)
-pca_data_oocyte[,-c(1:3)]<- (pca_data_oocyte[,-c(1:3)]+0.001)
-
-# Standardize the data
-scaled_pca_data_oocyte <-prcomp(pca_data_oocyte[c(4:12)], scale=TRUE, center=TRUE) 
-
-# Extract PC scores
-pca_scores_oocyte <- as.data.frame(scaled_pca_data_oocyte$x)
-
-# Extract timepoint info
-pca_info_oocyte<-pca_data_oocyte[c(2)]
-
-# Add back the non-numeric columns
-pca_scores_oocyte$timepoint <- pca_info_oocyte$timepoint
-
-# Create a data frame for variable loadings (arrows)
-loadings_oocyte <- as.data.frame(scaled_pca_data_oocyte$rotation)
-loadings_oocyte$variable <- row.names(loadings_oocyte)
-
-# Create the PCA plot with arrows
-oocyte_PCA <- ggplot(pca_scores_oocyte, aes(x = PC1, y = PC2)) +
-  geom_point(aes(color = timepoint), size = 3) +
-  geom_segment(data = loadings_oocyte, aes(x = 0, y = 0, xend = PC1*5, yend = PC2*5),
-               arrow = arrow(length = unit(0.2, "cm")), color = "black") +
-  geom_text_repel(data = loadings_oocyte, aes(x = PC1*5, y = PC2*5, label = variable),
-                  color = "black", size = 3) +
+# Plot for Total Chlorophyll
+chl <- ggplot(summary_data, aes(x = timepoint, y = Total_Chlorophyll_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Total_Chlorophyll_mean - Total_Chlorophyll_se, ymax = Total_Chlorophyll_mean + Total_Chlorophyll_se), width = 0.2, color = "black") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "solid") +  # Adding a linear trendline
+  xlab("") +
+  ylab(expression(bold(paste("Total Chlorophyll (", mu, "g cm"^-2, ")")))) +  # y-axis label with Greek letter
   theme_minimal() +
-  labs(x = paste0("PC1 (", round(summary(scaled_pca_data_oocyte)$importance[2,1]*100, 1), "%)"),
-       y = paste0("PC2 (", round(summary(scaled_pca_data_oocyte)$importance[2,2]*100, 1), "%)"));oocyte_PCA 
-
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))  # Add axis lines
 
 ```
 
-
-### PCA's for centroid and trajectories for all phys metrics and spermary size 
+Symbiont biomass
 ```{r}
-# need to remove spermary size from this as it filters out for only the last four months
-data.subset_spermary <- all.data %>% select(-oocyte_size)
-
-# make only complete cases for pca data
-pca_data_spermary <-data.subset_spermary[complete.cases(data.subset_spermary), ]
-
-# Standardize the data
-pca_data_spermary[,-c(1:3)]<-log(pca_data_spermary[,-c(1:3)]+1)
-
-# Standardize the data
-scaled_pca_data_spermary <-prcomp(pca_data_spermary[c(4:12)], scale=TRUE, center=TRUE) 
-
-# Extract PC scores
-pca_scores_spermary <- as.data.frame(scaled_pca_data_spermary$x)
-
-# Extract timepoint info
-pca_info_spermary<-pca_data_spermary[c(2)]
-
-# Add back the non-numeric columns
-pca_scores_spermary$timepoint <- pca_info_spermary$timepoint
-
-# Create a data frame for variable loadings (arrows)
-loadings_spermary <- as.data.frame(scaled_pca_data_spermary$rotation)
-loadings_spermary$variable <- row.names(loadings_spermary)
-
-# Create the PCA plot with arrows
-spermary_PCA <- ggplot(pca_scores_spermary, aes(x = PC1, y = PC2)) +
-  geom_point(aes(color = timepoint), size = 3) +
-  geom_segment(data = loadings_spermary, aes(x = 0, y = 0, xend = PC1*5, yend = PC2*5),
-               arrow = arrow(length = unit(0.2, "cm")), color = "black") +
-  geom_text_repel(data = loadings_spermary, aes(x = PC1*5, y = PC2*5, label = variable),
-                  color = "black", size = 3) +
+# Plot for Symbiont Biomass
+sym.bio <- ggplot(summary_data, aes(x = timepoint, y = Symbiont_Biomass_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Symbiont_Biomass_mean - Symbiont_Biomass_se, ymax = Symbiont_Biomass_mean + Symbiont_Biomass_se), width = 0.2, color = "black") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "solid") +  # Adding a linear trendline
+  xlab("") +
+  ylab(expression(bold(paste("Symbiont Biomass (mg cm"^-2, ")")))) +
   theme_minimal() +
-  labs(x = paste0("PC1 (", round(summary(scaled_pca_data_spermary)$importance[2,1]*100, 1), "%)"),
-       y = paste0("PC2 (", round(summary(scaled_pca_data_spermary)$importance[2,2]*100, 1), "%)"));spermary_PCA 
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))  # Add axis lines
+
+```
+
+Host biomass
+```{r}
+# Plot for Host Biomass
+host.bio <- ggplot(summary_data, aes(x = timepoint, y = Host_Biomass_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Host_Biomass_mean - Host_Biomass_se, ymax = Host_Biomass_mean + Host_Biomass_se), width = 0.2, color = "black") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "solid") +  # Adding a linear trendline
+  xlab("") +
+  ylab(expression(bold(paste("Host Biomass (mg cm"^-2, ")")))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))  # Add axis lines
+
+```
+
+
+Host protein
+```{r}
+# Host protein
+host_protein <- ggplot(summary_data, aes(x = timepoint, y = Host_Protein_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Host_Protein_mean - Host_Protein_se, ymax = Host_Protein_mean + Host_Protein_se), width = 0.2, color = "black") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "solid") +  # Adding a linear trendline
+  xlab("") +
+  ylab(expression(bold(paste("Host Protein (mg cm"^-2, ")")))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))  # Add axis lines
+
+```
+
+
+Holobiont protein
+```{r}
+# Plot for Holobiont Protein
+holo_protein <- ggplot(summary_data, aes(x = timepoint, y = Holobiont_Protein_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Holobiont_Protein_mean - Holobiont_Protein_se, ymax = Holobiont_Protein_mean + Holobiont_Protein_se), width = 0.2, color = "black") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "solid") +  # Adding a linear trendline
+  xlab("") +
+  ylab(expression(bold(paste("Holobiont Protein (mg cm"^-2, ")")))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))  # Add axis lines
+
+```
+
+
+```{r}
+# Define consistent y-axis limits
+y_limits <- list(
+  temp = c(25, 30),
+  light = c(1000, 6000),
+  sym = c(min(summary_data$Symbiont_Density_mean - summary_data$Symbiont_Density_se, na.rm = TRUE),
+          max(summary_data$Symbiont_Density_mean + summary_data$Symbiont_Density_se, na.rm = TRUE)),
+  chl = c(min(summary_data$Total_Chlorophyll_mean - summary_data$Total_Chlorophyll_se, na.rm = TRUE),
+          max(summary_data$Total_Chlorophyll_mean + summary_data$Total_Chlorophyll_se, na.rm = TRUE)),
+  sym_bio = c(min(summary_data$Symbiont_Biomass_mean - summary_data$Symbiont_Biomass_se, na.rm = TRUE),
+              max(summary_data$Symbiont_Biomass_mean + summary_data$Symbiont_Biomass_se, na.rm = TRUE))
+)
+
+# Apply consistent y-axis limits to each plot
+temp_summary_plot <- temp_summary_plot +
+  ylim(y_limits$temp)
+
+light_summary_plot <- light_summary_plot +
+  ylim(y_limits$light)
+
+sym <- sym +
+  ylim(y_limits$sym)
+
+chl <- chl +
+  ylim(y_limits$chl)
+
+sym.bio <- sym.bio +
+  ylim(y_limits$sym_bio)
+
+# Combine the adjusted plots
+combined_plot <- (temp_summary_plot / 
+                   light_summary_plot / 
+                   sym / 
+                   chl / 
+                   sym.bio) +
+  plot_layout(heights = c(1, 1, 1, 1, 1)) # Adjust heights if needed
+
+# Display the combined plot
+print(combined_plot)
 
 
 ```
 
 
-Examine PERMANOVA results.  
-# For oocyte and spermary data last four months
-```{r}
-# scale data
-vegan <- scale(pca_data[ ,4:13])
-
-# PerMANOVA - partitioning the euclidean distance matrix by species
-permanova<-adonis2(vegan ~ timepoint, data = pca_data, method='eu')
-z_pca<-permanova
-z_pca
-``` 
-
-adonis2(formula = vegan ~ timepoint, data = pca_data, method = "eu")
-          Df SumOfSqs      R2      F Pr(>F)    
-timepoint  3   284.13 0.42407 15.708  0.001 ***
-Residual  64   385.87 0.57593                  
-Total     67   670.00 1.00000 
-
-# For oocyte only
-```{r}
-# scale data
-vegan_oocyte <- scale(pca_data_oocyte[ ,4:12])
-
-# PerMANOVA - partitioning the euclidean distance matrix by species
-permanova_oocyte<-adonis2(vegan_oocyte ~ timepoint, data = pca_data_oocyte, method='eu')
-z_pca_oocyte<-permanova_oocyte
-z_pca_oocyte
-``` 
-
-adonis2(formula = vegan_oocyte ~ timepoint, data = pca_data_oocyte, method = "eu")
-           Df SumOfSqs      R2      F Pr(>F)    
-timepoint   8     1452 0.48017 37.872  0.001 ***
-Residual  328     1572 0.51983                  
-Total     336     3024 1.00000  
-
-# For spermary only
-```{r}
-# scale data
-vegan_spermary <- scale(pca_data_spermary[ ,4:12])
-
-# PerMANOVA - partitioning the euclidean distance matrix by species
-permanova_spermary<-adonis2(vegan_spermary ~ timepoint, data = pca_data_spermary, method='eu')
-z_pca_spermary<-permanova_spermary
-z_pca_spermary
-``` 
-
-adonis2(formula = vegan_spermary ~ timepoint, data = pca_data_spermary, method = "eu")
-           Df SumOfSqs      R2      F Pr(>F)    
-timepoint   3   502.52 0.41982 31.356  0.001 ***
-Residual  130   694.48 0.58018                  
-Total     133  1197.00 1.00000  
-
-Examine dispersion this model
-
-# For oocyte and spermary for four months
-```{r}
-#conduct pairwise adonis to look at pairwise permanova comparisons
-pairwise.adonis(x=pca_data[ ,4:13],factors=pca_data$timepoint, sim.function="vegdist",  sim.method='euclidean', p.adjust.m='bonferroni')
-
-#evaluate dispersion
-beta<-betadisper(vegdist(pca_data[ ,4:13], "euclidian"), pca_data$timepoint)
-anova(beta)
-
-#conduct posthoc analysis of betadispersion
-TukeyHSD(beta)
-```
-There is a difference in dispersion by timepoint, so therefore differences are likely due to both dispersion and centroid location. 
 
 

@@ -64,10 +64,10 @@ library(lsmeans)
 
 Load in master dataframe generated from 1_assemble_data.Rmd.  
 ```{r}
-master<-read.csv("gametogenesis_timeseries_analysis/Output/master_timeseries.csv")
+master<-read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/master_timeseries.csv")
 
 # read in metadata to add patch to master timeseries
-metadata <- read.csv("gametogenesis_timeseries_analysis/master_metadata.csv")
+metadata <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/master_metadata.csv")
 
 # add ACR- before each tag number
 metadata <- metadata %>%
@@ -610,7 +610,7 @@ x.grob <- textGrob("TIMEPOINT",
 #add to plot
 phys_sym_figure <- grid.arrange(arrangeGrob(phys_sym_figure, bottom = x.grob))
 
-ggsave(filename="gametogenesis_timeseries_analysis/l;'
+ggsave(filename="gametogenesis_timeseries/gametogenesis_timeseries_analysis/l;'
        Figures/Phys_Sym_Figure.png", plot=phys_sym_figure, dpi=300, width=49, height=20, units="in")
 
 phys_host_figure<-plot_grid(host_prot_cm2, holobiont_prot_cm2, host_bio_cm2, ncol=3, nrow=1, labels = c('A', 'B', 'C'),label_size = 80,rel_heights= 1, rel_widths = 1, label_y=1, align="h")
@@ -622,6 +622,6 @@ x.grob <- textGrob("TIMEPOINT",
 #add to plot
 phys_host_figure <- grid.arrange(arrangeGrob(phys_host_figure, bottom = x.grob))
 
-ggsave(filename="gametogenesis_timeseries_analysis/Figures/Phys_Host_Figure.png", plot=phys_host_figure, dpi=300, width=45, height=20, units="in")
+ggsave(filename="gametogenesis_timeseries/gametogenesis_timeseries_analysis/Figures/Phys_Host_Figure.png", plot=phys_host_figure, dpi=300, width=45, height=20, units="in")
 ```
 

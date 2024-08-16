@@ -139,9 +139,9 @@ ggsave("histology/output/spermatogenesis_abundance_bycolony.png", spermato2 , wi
 
 # Plot relative abundance per stage per timepoint for oogenesis 
 ```{r}
-# Replace NA in Stage with "No Data in Slides" if desired
+# Replace NA in Stage with "Stage 0"
 abundance_clean <- abundance %>%
-  mutate(Stage = ifelse(is.na(Stage), "No Data in Slides", as.character(Stage)))
+  mutate(Stage = ifelse(is.na(Stage), "Stage 0", as.character(Stage)))
 
 # Filter for oocytes and calculate total counts
 rel.abun <- abundance_clean %>%
@@ -155,25 +155,30 @@ rel.abun <- abundance_clean %>%
 rel.abun <- rel.abun %>%
   mutate(freq = stage_count / grand_tots)
 
-# Calculate the "No Data" frequency
-df_relative_abundance_with_no_data <- rel_full %>%
+# Calculate the "No Data" frequency for Stage 0
+oocyte.abund.all <- rel.abun %>%
   group_by(timepoint) %>%
-  mutate(freq_no_data = 1 - sum(freq[Stage != "No Data in Slides"], na.rm = TRUE)) %>%
+  mutate(freq_no_data = 1 - sum(freq[Stage != "Stage 0"], na.rm = TRUE)) %>%
   ungroup() %>%
-  mutate(freq = ifelse(Stage == "No Data in Slides", freq_no_data, freq)) %>%
-  select(timepoint, Stage, freq) %>%
+  mutate(freq = ifelse(Stage == "Stage 0", freq_no_data, freq)) %>%
+  dplyr::select(timepoint, Stage, freq) %>%
   distinct()
 
+# Ensure that Stage is a factor and includes all levels, even if missing
+oocyte.abund.all$Stage <- factor(oocyte.abund.all$Stage, 
+                                                   levels = c("Stage 0", "Stage I", "Stage II", "Stage III", "Stage IV", "Stage V"))
+
 # Reorder the levels of the 'timepoint' variable
-df_relative_abundance_with_no_data$timepoint <- factor(df_relative_abundance_with_no_data$timepoint, 
-                                           levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
-                                           ordered = TRUE)
+oocyte.abund.all$timepoint <- factor(oocyte.abund.all$timepoint, 
+                                                       levels = c("December", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October"),
+                                                       ordered = TRUE)
 
 # Define color gradient
-color_gradient <- c("Stage I" = "#EAE2F8", "Stage II" = "#D0A6F7", "Stage III" = "#B76CF7", "Stage IV" = "#8E2BEA", "Stage V" = "#3B1E8F", "No Data in Slides" = "#D3D3D3")
+color_gradient <- c("Stage 0" = "#D3D3D3", "Stage I" = "#EAE2F8", "Stage II" = "#D0A6F7", 
+                    "Stage III" = "#B76CF7", "Stage IV" = "#8E2BEA", "Stage V" = "#3B1E8F")
 
 # Plot for Oocytes with gradient color scheme
-oocytes_plot <- df_relative_abundance_with_no_data %>%
+oocytes_plot <- oocyte.abund.all %>%
   ggplot(aes(x = timepoint, y = freq, fill = Stage)) +
   geom_col(position = "stack") +  # Stack bars to show relative abundance
   scale_fill_manual(values = color_gradient) +
@@ -183,14 +188,18 @@ oocytes_plot <- df_relative_abundance_with_no_data %>%
         axis.text.y = element_text(size = 20),  # Increase size of y-axis text
         axis.title.x = element_blank(),  # Remove x-axis label
         axis.title.y = element_text(size = 22),
-        legend.position = "none",  # Remove legend (it will be added globally)
         text = element_text(size = 22),
+        legend.position = "top",  # Place legend at the top
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +  # Remove grid lines for clarity
   scale_y_continuous(expand = c(0, 0), limits = c(0, 1)); oocytes_plot
 
 # Save the oocytes plot
 ggsave("histology/output/oocytes_relative_abundance.png", oocytes_plot, width = 13, height = 8)
+
+
+# save dataframe for downstream figure
+write.csv(oocyte.abund.all, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oocyte_abun_data.csv")
 
 
 ```
@@ -209,20 +218,20 @@ rel.abun_spermatocyte <- abundance_clean %>%
 rel.abun_spermatocyte <- rel.abun_spermatocyte %>%
   mutate(freq = stage_count / grand_tots)
 
-# Ensure all stages including "No Data in Slides" are present
+# Ensure all stages including "No Data in Slides" Stage 0 are present
 rel_full_spermatocyte <- rel.abun_spermatocyte %>%
   complete(timepoint, Stage = c(levels(rel.abun_spermatocyte$Stage)), fill = list(freq = 0)) %>%
   group_by(timepoint) %>%
   mutate(freq = ifelse(is.na(freq), 0, freq)) %>%
   ungroup()
 
-# Calculate the "No Data" frequency
+# Calculate the "No Data" Stage 0 frequency
 sperm_abun <- rel_full_spermatocyte %>%
   group_by(timepoint) %>%
-  mutate(freq_no_data = 1 - sum(freq[Stage != "No Data in Slides"], na.rm = TRUE)) %>%
+  mutate(freq_no_data = 1 - sum(freq[Stage != "Stage 0"], na.rm = TRUE)) %>%
   ungroup() %>%
-  mutate(freq = ifelse(Stage == "No Data in Slides", freq_no_data, freq)) %>%
-  select(timepoint, Stage, freq) %>%
+  mutate(freq = ifelse(Stage == "Stage 0", freq_no_data, freq)) %>%
+  dplyr::select(timepoint, Stage, freq) %>%
   distinct()
 
 # Reorder the levels of the 'timepoint' variable
@@ -231,9 +240,9 @@ sperm_abun$timepoint <- factor(sperm_abun$timepoint,
                                                    ordered = TRUE)
 
 # Define color gradient
-color_gradient <- c("Stage I" = "#EAE2F8", "Stage II" = "#D0A6F7", "Stage III" = "#B76CF7", "Stage IV" = "#8E2BEA", "Stage V" = "#3B1E8F", "No Data in Slides" = "#D3D3D3")
+color_gradient <- c("Stage I" = "#EAE2F8", "Stage II" = "#D0A6F7", "Stage III" = "#B76CF7", "Stage IV" = "#8E2BEA", "Stage V" = "#3B1E8F", "Stage 0" = "#D3D3D3")
 
-# Plot for Spermatocytes with gradient color scheme
+# Plot spermatocytes per month abundance
 spermatocytes_plot <- sperm_abun %>%
   ggplot(aes(x = timepoint, y = freq, fill = Stage)) +
   geom_col(position = "stack") +  # Stack bars to show relative abundance
@@ -245,15 +254,19 @@ spermatocytes_plot <- sperm_abun %>%
         axis.text.y = element_text(size = 20),  # Increase size of y-axis text
         axis.title.y = element_text(size = 22),
         axis.title.x = element_text(size = 22),
-        legend.position = "none",  # Remove legend (it will be added globally)
         text = element_text(size = 22),
+        legend.position = ("none"),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +  # Remove grid lines for clarity
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 1)); spermatocyte_plot
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 1)); spermatocytes_plot
 
 
 # Save the spermatocyte plot
-ggsave("histology/output/spermatocyte_relative_abundance.png", spermatocyte_plot, width = 13, height = 8)
+ggsave("histology/output/spermatocyte_relative_abundance.png", spermatocytes_plot, width = 13, height = 8)
+
+
+# save dataframe for downstream figure
+write.csv(sperm_abun, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_abun_data.csv")
 
 
 ```
@@ -263,9 +276,9 @@ ggsave("histology/output/spermatocyte_relative_abundance.png", spermatocyte_plot
 # Combine plots using patchwork
 combined_plot <- (oocytes_plot / spermatocytes_plot) +
   plot_annotation(tag_levels = 'A',  # Automatically add tags 'A', 'B', etc.
-    theme = theme(plot.tag = element_text(size = 24, face = "bold"))) +
-  plot_layout(guides = "collect") &  # Collect legends into a single legend above both plots
-  theme(legend.position = "top");combined_plot  # Collect legends into a single legend
+                  theme = theme(plot.tag = element_text(size = 24, face = "bold"))) &
+  theme(legend.position = "top")  # Position the legend at the top
+combined_plot <- combined_plot + plot_layout(guides = "collect");combined_plot  # Collect legends into a single legend
 
 # Save the combined plot
 ggsave("histology/output/combined_abundance_plots.png", combined_plot, width = 20, height = 15)
@@ -358,17 +371,17 @@ oogen <- oogen_size %>%
   theme_classic() +
   theme(
     legend.position = "none",
-    axis.title.x = element_blank(),  # Remove x-axis title
-    axis.text.x = element_blank(),   # Remove x-axis labels
-    axis.ticks.x = element_blank(),  # Remove x-axis ticks
-    axis.title.y = element_text(face = "bold", size = 30),  # Keep y-axis title
-    axis.text.y = element_text(size = 30, color = "black")); oogen
+    axis.title = element_text(face = "bold", size = 30),
+    axis.text = element_text(size = 30, color = "black"),
+    axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),  # Rotate x-axis labels
+    strip.text.x = element_text(face = "italic", size = 30)); oogen
 
 # Save the plot as an image
 ggsave("histology/output/oogen.size.month.boxplot.png", oogen, width = 13, height = 8)
 
 
-
+# save dataframe for downstream figure
+write.csv(oogen_size, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oogen_size_data.csv")
 ```
 
 
@@ -465,6 +478,9 @@ sperm <- sperm_size %>%
 
 # Save the plot as an image
 ggsave("histology/output/sperm.size.month.boxplot.png", sperm, width = 13, height = 8)
+
+# save dataframe for downstream figure
+write.csv(sperm_size, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_size_data.csv")
 
 ```
 

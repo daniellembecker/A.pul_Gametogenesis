@@ -193,9 +193,9 @@ temp_summary_plot <- temp.data %>%
       ylim(25, 30);temp_summary_plot
 
 # save mean temp per month plot
-#ggsave("RAnalysis/output/environmental/temp_summary_plot.pdf", temp_summary_plot , width = 10, height = 6)
 ggsave("RAnalysis/output/environmental/temp_summary_plot.jpg", temp_summary_plot , width = 10, height = 6)
 
+write.csv(temp.data, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/mean_temp_data.csv")
 
 
 ```
@@ -247,7 +247,7 @@ light.data.sep$Date <- as.Date(light.data.sep$Date, format = "%Y-%m-%d")
 
 # remove first two columns
 light.data.save <- light.data.sep %>%
-  select(-date, -time, -raw)
+  dplyr::select(-date, -time, -raw)
 
 # save dataframe
 write.csv(light.data.save, 'RAnalysis/output/environmental/mahana_light_data.csv')
@@ -337,6 +337,9 @@ light_summary_plot
 # save mean temp per month plot
 #ggsave("RAnalysis/output/environmental/light_summary_plot.pdf", light_summary_plot , width = 10, height = 6)
 ggsave("RAnalysis/output/environmental/light_summary_plot.jpg", light_summary_plot , width = 10, height = 6)
+
+write.csv(light.data, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/mean_light_data.csv")
+
 ```
 
 # Make a commbined plot of light and temperature
@@ -356,13 +359,13 @@ light.temp <- ggplot(mean_monthly_data, aes(x = month)) +
   geom_point(aes(y = (mean_light - 2000) / 833 + 26, color = "Light Intensity", group = 1), size = 3) +  # Add points for light intensity
   geom_line(aes(y = (mean_light - 2000) / 833 + 26, color = "Light Intensity", group = 1)) +  # Add lines for light intensity
   scale_y_continuous(
-    sec.axis = sec_axis(~ (. - 26) * 833 + 2000, name = expression("Mean Light Intensity " * (mu*mol~m^{-2}~s^{-1}))), name = "Mean Sea Surface Temperature (°C)",
+    sec.axis = sec_axis(~ (. - 26) * 833 + 2000, name = expression("Light Intensity " * (mu*mol~m^{-2}~s^{-1}))), name = "Temperature (°C)",
     limits = c(26, 29)) + # Set limits for the primary y-axis)) 
   scale_color_manual(values = c("Temperature" = "black", "Light Intensity" = "grey")) +  # Set colors
   labs(x = "Month", y = NULL) +
   theme_classic() +
   labs(color = "Environmental Data") +
-  theme(
+  theme(legend.position = ("none"),
     axis.title.y = element_text(color = "black", size = 18),
     axis.text.y = element_text(color = "black", size = 18),
     axis.title.x = element_text(color = "black", size = 18),
@@ -378,6 +381,7 @@ ggsave("RAnalysis/output/environmental/mean.light.temp.jpg", light.temp , width 
 
 
 ```
+
 
 
 
