@@ -73,13 +73,7 @@ view(temp.data)
 ```{r}
 temp.data$date.time <- mdy_hm(temp.data$date.time, quiet=FALSE, tz="UTC", truncated=0) #format date and time
 ```
- 
 
-#save file as csv so transforms to data frame
-```{r}
-write.csv(temp.data, 'RAnalysis/output/environmental/20240129_mahana_temp_data.csv')
-```
- 
 
 #make logger number a factor
 ```{r}
@@ -105,7 +99,7 @@ mean_temp_per_day <- temp.data.sep %>%
 mean_temp_per_day$date <- as.Date(mean_temp_per_day$date)
 
 filtered_data <- mean_temp_per_day %>%
-  filter((date >= as.Date("2022-01-24") & date <= as.Date("2022-11-04")))
+  filter((date >= as.Date("2022-01-24") & date <= as.Date("2022-10-31")))
 
 filtered_data <- filtered_data %>%
   filter(date != as.Date("2022-08-07"))
@@ -140,12 +134,15 @@ ggsave(filename="RAnalysis/output/environmental/20240129_temp_logger_plot.png", 
 
 # plot temeprature mean sea surface temp per month
 ```{r}
-
 # Calculate mean sea surface temperature per month
 temp.data$month <- factor(month(temp.data$date.time), levels = 1:12, labels = month.abb)  # Extract month from date as factor
 
+#filter to not show november 
+temp.dat <- temp.data %>%
+  filter(month != "Nov")
+
 #group data by month and summarise for mean temp per month
-mean_temp_per_month <- temp.data %>%
+mean_temp_per_month <- temp.dat %>%
   group_by(month) %>%
   summarise(mean_temp = mean(temp, na.rm = TRUE)) %>%
   arrange(match(month, month.abb))  # Sort the data by month in ascending order
@@ -164,7 +161,7 @@ temp.month
 
 # save mean temp per month plot
 #ggsave("RAnalysis/output/environmental/mean.temp.month.pdf", temp.month , width = 10, height = 6)
-ggsave("RAnalysis/output/environmental/mean.temp.month.jpg", temp.month , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/mean.temp.month.png", temp.month , width = 10, height = 6)
 
 
 ```
@@ -172,28 +169,28 @@ ggsave("RAnalysis/output/environmental/mean.temp.month.jpg", temp.month , width 
 
 # plot temeprature mean sea surface temp per month with variation around
 ```{r}
+# Ensure data only contains January to October
+temp.dat <- temp.dat %>%
+  filter(month(date.time) %in% 1:10)  # Filter to keep only January to October
 
-# Calculate mean sea surface temperature per month
-temp.data$month <- factor(month(temp.data$date.time), levels = 1:12, labels = month.abb)  # Extract month from date as factor
-
-# Plot mean sea surface temperature per month with variation around the mean
-temp_summary_plot <- temp.data %>%
-  ggplot(., aes(x=date.time, y= temp)) + 
-  geom_point(colour="gray", size=0.5, alpha=0.05) + 
-  geom_smooth(aes(), se=FALSE, method="gam", colour = "black") + 
+# Make smoothed line plot
+temp_summary_plot <- temp.dat %>%
+  ggplot(aes(x = date.time, y = temp)) + 
+  geom_point(colour = "gray", size = 0.5, alpha = 0.05) + 
+  geom_smooth(se = FALSE, method = "gam", colour = "black") + 
   ylab("Temperature °C") + 
   xlab("Date") +
-  scale_x_datetime(date_breaks = "1 months", date_labels = "%b %Y")+
+  scale_x_datetime(date_breaks = "1 month", date_labels = "%b %Y", 
+                   limits = c(as.POSIXct("2022-01-25"), as.POSIXct("2022-10-31"))) +
   theme_classic() + 
-  theme(
-    text=element_text(size=14, colour="black"), 
-    axis.title=element_text(size=18, colour="black", face="bold"), 
-    axis.text.x=element_text(size=14, colour="black", angle=45, hjust=1, vjust=1),
-    legend.title=element_text(size=18, colour="black", face="bold")) +
-      ylim(25, 30);temp_summary_plot
+  theme(text = element_text(size = 14, colour = "black"), 
+    axis.title = element_text(size = 18, colour = "black", face = "bold"), 
+    axis.text.x = element_text(size = 14, colour = "black", angle = 45, hjust = 1, vjust = 1),
+    legend.title = element_text(size = 18, colour = "black", face = "bold")) + 
+  ylim(25, 30);temp_summary_plot
 
 # save mean temp per month plot
-ggsave("RAnalysis/output/environmental/temp_summary_plot.jpg", temp_summary_plot , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/temp_summary_plot.png", temp_summary_plot , width = 10, height = 6)
 
 write.csv(temp.data, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/mean_temp_data.csv")
 
@@ -249,19 +246,17 @@ light.data.sep$Date <- as.Date(light.data.sep$Date, format = "%Y-%m-%d")
 light.data.save <- light.data.sep %>%
   dplyr::select(-date, -time, -raw)
 
-# save dataframe
-write.csv(light.data.save, 'RAnalysis/output/environmental/mahana_light_data.csv')
-
 # Group by Date and calculate the mean temperature for each day
 mean_light_per_day <- light.data.sep %>%
   group_by(Date) %>%
   summarise(mean_light = mean(calibrated))
 
+
+
 ```
 
 ```{r}
 #compare  light across timeseries
-
 light.plot <- mean_light_per_day %>%
   ggplot(aes(x = Date, y = mean_light)) +
   geom_line() + 
@@ -308,7 +303,7 @@ light.month
 
 # save mean temp per month plot
 #ggsave("RAnalysis/output/environmental/mean.light.month.pdf", light.month , width = 10, height = 6)
-ggsave("RAnalysis/output/environmental/mean.light.month.jpg", light.month , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/mean.light.month.png", light.month , width = 10, height = 6)
 
 ```
 
@@ -336,7 +331,7 @@ light_summary_plot
 
 # save mean temp per month plot
 #ggsave("RAnalysis/output/environmental/light_summary_plot.pdf", light_summary_plot , width = 10, height = 6)
-ggsave("RAnalysis/output/environmental/light_summary_plot.jpg", light_summary_plot , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/light_summary_plot.png", light_summary_plot , width = 10, height = 6)
 
 write.csv(light.data, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/mean_light_data.csv")
 
@@ -377,7 +372,7 @@ light.temp
 
 # save mean temp per month plot
 #ggsave("RAnalysis/output/environmental/mean.light.temp.pdf", light.temp , width = 10, height = 6)
-ggsave("RAnalysis/output/environmental/mean.light.temp.jpg", light.temp , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/mean.light.temp.png", light.temp , width = 10, height = 6)
 
 
 ```

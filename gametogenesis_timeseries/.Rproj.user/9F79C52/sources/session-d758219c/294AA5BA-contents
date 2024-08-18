@@ -14,8 +14,6 @@ This script will analyze gamete abundance in Acropora pulchra over time. The dat
 knitr::opts_chunk$set(echo = TRUE)
 
 library("tidyverse")
-library("betareg")
-library("glmmTMB")
 library("gridExtra")
 library("ghibli")
 library("lme4")
@@ -35,7 +33,7 @@ abundance <- read.csv("histology/data/histological_data.csv", header = T, na.str
 
 # organize data make timepoints factors with levels in order for plots and calculate frequency
 df_relative_abundance <- abundance %>%
-  count(colony_id, replicate_id, site, timepoint, Stage, gonad.type, patch, name = "stage_count") %>%
+  count(colony_id, replicate_id, site, timepoint, Stage, gonad.type, name = "stage_count") %>%
   group_by(colony_id, replicate_id, site, timepoint, gonad.type) %>%
   mutate(grand_tots = sum(stage_count)) %>%
   mutate(freq = stage_count / grand_tots)
@@ -292,7 +290,7 @@ ggsave("histology/output/combined_abundance_plots.png", combined_plot, width = 2
 ```{r}
 # select for grand mean size dataframe
 oogen_size <- abundance %>%
-  dplyr::select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage, patch)
+  dplyr::select(replicate_id, colony_id, timepoint, gonad.type, geometric.mean, Stage)
 
 # select just oocytes, remove any spermatocyte data
 oogen_size <- oogen_size %>%
@@ -499,18 +497,4 @@ combined_plot <- (oogen / sperm) +
 # Save the combined plot
 ggsave("histology/output/combined_oocyte_sperm_size_plots.png", combined_plot, width = 20, height = 20)
 ```
-
-
-# Calculate relative abundance change overtime with logistic regression, with colony_id as a random effect
-```{r}
-# Use abundance clean dataframe for oocytes and spermmaries
-
-
-```
-
-
-
-
-
-
 

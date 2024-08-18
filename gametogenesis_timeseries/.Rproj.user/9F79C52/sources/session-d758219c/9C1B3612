@@ -1,0 +1,28 @@
+{
+    "id": "9C1B3612",
+    "path": "~/Desktop/Putnam_Lab/A.pul_Gametogenesis/gametogenesis_timeseries/gametogenesis_timeseries_analysis/Scripts/3_multivariate_analysis.Rmd",
+    "project_path": "gametogenesis_timeseries_analysis/Scripts/3_multivariate_analysis.Rmd",
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": true,
+    "created": 1721782677332.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "console",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "41,11",
+        "scrollLine": "29",
+        "working_dir": "project"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1723998129,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1723998256990,
+    "read_only": false,
+    "read_only_alternatives": []
+}
