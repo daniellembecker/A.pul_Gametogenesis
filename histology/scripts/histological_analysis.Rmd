@@ -19,6 +19,7 @@ library("glmmTMB")
 library("gridExtra")
 library("ghibli")
 library("lme4")
+library("nnet")
 library("car")
 library("PNWColors")
 library("lubridate")
@@ -148,7 +149,7 @@ abundance_clean <- abundance %>%
 # Filter for oocytes and calculate total counts
 rel.abun <- abundance_clean %>%
   filter(gonad.type == "oocyte") %>%
-  count(site, timepoint, Stage, gonad.type, name = "stage_count") %>%
+  count(site, timepoint, Stage, gonad.type, colony_id, name = "stage_count") %>%
   group_by(timepoint) %>%
   mutate(grand_tots = sum(stage_count, na.rm = TRUE)) %>%
   ungroup()
@@ -211,7 +212,7 @@ write.csv(oocyte.abund.all, "gametogenesis_timeseries/gametogenesis_timeseries_a
 # Filter for spermatocytes and calculate total counts
 rel.abun_spermatocyte <- abundance_clean %>%
   filter(gonad.type == "spermatocyte") %>%
-  count(site, timepoint, Stage, gonad.type, name = "stage_count") %>%
+  count(site, timepoint, Stage, gonad.type, colony_id, name = "stage_count") %>%
   group_by(timepoint) %>%
   mutate(grand_tots = sum(stage_count, na.rm = TRUE)) %>%
   ungroup()
@@ -504,8 +505,16 @@ ggsave("histology/output/combined_oocyte_sperm_size_plots.png", combined_plot, w
 # Calculate relative abundance change overtime with logistic regression, with colony_id as a random effect
 ```{r}
 # Use abundance clean dataframe for oocytes and spermmaries
+oocyte_data <- oocyte.abund.all
+spermatocyte_data <- sperm_abun
 
+# check beta regression model assumptions and inclusion of colony_id as a random effect
+# For oocytes
+model_oocyte_no_re <- betareg(freq_adjusted ~ Stage, data = oocyte_data)
+model_oocyte_re <- glmmTMB(freq_adjusted ~ Stage + (1 | colony_id), family = beta_family(), data = oocyte_data)
 
+multinom_model <- multinom(Stage ~ timepoint, data = oocyte_data, weights = freq)
+summary(multinom_model)
 ```
 
 

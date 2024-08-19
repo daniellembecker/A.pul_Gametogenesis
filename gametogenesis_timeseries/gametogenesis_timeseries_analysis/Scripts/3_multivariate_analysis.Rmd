@@ -213,10 +213,10 @@ light_summary_plot <- light.dat %>%
   xlab("") + # This will set the x-axis label but you can remove this line if you want to remove the x-axis title
   scale_x_datetime(date_breaks = "1 months", date_labels = "%b %Y") +
   theme_classic() + 
-  theme(text = element_text(size = 12, colour = "black"), 
-    axis.title = element_text(size = 14, colour = "black", face = "bold"), 
+  theme(text=element_text(size=14, colour="black"), 
+    axis.title=element_text(size=18, colour="black", face="bold"), 
     axis.text.x = element_blank(), # Hide x-axis text labels
-    legend.title = element_text(size = 14, colour = "black", face = "bold")) +
+    legend.title=element_text(size=18, colour="black", face="bold")) +
   scale_y_continuous(expand = c(0, 0)) +
   coord_cartesian(ylim = c(1000, 6000));light_summary_plot
 
@@ -386,8 +386,8 @@ temp_summary_plot <- temp_summary_plot + theme(axis.title.x = element_blank(),
 light_summary_plot <- light_summary_plot + theme(axis.title.x = element_blank(), 
                                    axis.text.x = element_blank(), 
                                    axis.ticks.x = element_blank(),
-                                     axis.title=element_text(face="bold", size=18),
-                                     axis.text=element_text(size=18, color="black"))
+                                   axis.title=element_text(face="bold", size=18),
+                                   axis.text=element_text(size=18, color="black"))
 
 symbplot_cm2 <- symbplot_cm2 + theme(axis.title.x = element_blank(), 
                                      axis.text.x = element_blank(), 
@@ -420,10 +420,7 @@ holobiont_prot_cm2 <- holobiont_prot_cm2 + theme(axis.title.x = element_blank(),
                                                  axis.title=element_text(face="bold", size=18),
                                                  axis.text=element_text(size=18, color="black"))
 
-host_bio_cm2 <- host_bio_cm2 + theme(axis.title.x = element_blank(), 
-                                                 axis.text.x = element_blank(), 
-                                                 axis.ticks.x = element_blank(),
-                                                 axis.title=element_text(face="bold", size=18),
+host_bio_cm2 <- host_bio_cm2 + theme(axis.title=element_text(face="bold", size=18),
                                                  axis.text=element_text(size=18, color="black"))
 
 # Leave the x-axis labels and ticks for the last plot (host_bio_cm2)

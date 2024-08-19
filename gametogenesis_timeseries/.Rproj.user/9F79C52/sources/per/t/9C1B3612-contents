@@ -1,0 +1,439 @@
+---
+title: "Multivariate analysis of gametogenesis physiological, reproductive, and environmental data"
+author: "Ariana S Huffmyer, E5 RoL Team"
+edited: "DM Becker"
+date: "20240709"
+output: 
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_depth: 6
+    toc_float: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+# Set Up    
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+```{r}
+## install packages if you dont already have them
+if (!require("tidyverse")) install.packages("tidyverse")
+if (!require("ggplot2")) install.packages("ggplot2")
+if (!require("RColorBrewer")) install.packages("RColorBrewer")
+if (!require("lme4")) install.packages("lme4")
+if (!require("lmerTest")) install.packages("lmerTest")
+if (!require("car")) install.packages("car")
+if (!require("effects")) install.packages("effects")
+if (!require("ggfortify")) install.packages("ggfortify")
+if (!require("cowplot")) install.packages("cowplot")
+if (!require("vegan")) install.packages("vegan")
+if (!require("corrr")) install.packages("corrr")
+if (!require("ggcorrplot")) install.packages("ggcorrplot")
+if (!require("GGally")) install.packages("GGally")
+if (!require("broom")) install.packages("broom")
+if (!require("cowplot")) install.packages("cowplot")
+# Install devtools if not already installed
+if (!require("devtools")) install.packages("devtools")
+# Load devtools
+library(devtools)
+# Install pairwiseAdonis from GitHub
+devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
+if (!require("corrplot")) install.packages("corrplot")
+if (!require("dplyr")) install.packages("dplyr")
+
+# load packages
+library(tidyverse)
+library(ggrepel)
+library(plyr)
+library(corrplot)
+library(ggplot2)
+library(RColorBrewer)
+library(lme4)
+library(lmerTest)
+library(car)
+library(lubridate)
+library(effects)
+library(ggfortify)
+library(cowplot)
+library(vegan)
+library(dplyr)
+library(corrr)
+library(ggcorrplot)
+library(GGally)
+library(broom)
+library(cowplot)
+library(patchwork)
+library(pairwiseAdonis)
+```
+
+# Load dataframe
+
+Use univariate analyses plots for main figure, comment this out for now if we want dot plots with mean se
+Load in master data frames for environmental, physiological, and reproductive data 
+```{r}
+# master<-read.csv("gametogenesis_timeseries_analysis/Output/master_timeseries.csv")
+```
+
+# Aggregate and rename physioloigcal data
+```{r}
+# # Assuming phys_data is already filtered and renamed correctly
+# phys_data <- master %>%
+#   dplyr::select(colony_id, timepoint, Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Total_Chl_cm2, host_prot_mg.cm2, holobiont_prot_mg.cm2, cells.cm2) %>%
+#   filter(Host_AFDW.mg.cm2 > 0) %>%
+#   filter(Sym_AFDW.mg.cm2 > 0) %>%
+#   dplyr::rename(
+#     Host_Biomass = Host_AFDW.mg.cm2,
+#     Symbiont_Biomass = Sym_AFDW.mg.cm2,
+#     Symbiont_Density = cells.cm2,
+#     Host_Protein = host_prot_mg.cm2,
+#     Holobiont_Protein = holobiont_prot_mg.cm2,
+#     Total_Chlorophyll = Total_Chl_cm2)
+# 
+# # Ensure timepoint is a factor with appropriate levels
+# phys_data$timepoint <- factor(phys_data$timepoint, levels = unique(phys_data$timepoint))
+# 
+# # Calculate IQR for Total_Chlorophyll due to outliers
+# Q1 <- quantile(phys_data$Total_Chlorophyll, 0.25, na.rm = TRUE)
+# Q3 <- quantile(phys_data$Total_Chlorophyll, 0.75, na.rm = TRUE)
+# IQR <- Q3 - Q1
+# 
+# # Define bounds for outliers
+# lower_bound <- Q1 - 1.5 * IQR
+# upper_bound <- Q3 + 1.5 * IQR
+# 
+# # Remove outliers
+# phys_data_cleaned <- phys_data %>%
+#   filter(Total_Chlorophyll >= lower_bound & Total_Chlorophyll <= upper_bound)
+# 
+# # Remove August ACR-426 datapoint from the cleaned data for host protein due to outlier
+# phys_data_cleaned <- phys_data_cleaned %>%
+#   filter(!(timepoint == "AUGUST" & colony_id == "ACR-426"))
+# 
+# # Calculate mean, se and SD per timepoint
+# summary_data <- do.call(rbind, by(phys_data_cleaned, phys_data_cleaned$timepoint, function(x) {
+#   n <- nrow(x)  # Sample size
+#   
+#   calculate_stats <- function(var) {
+#     mean_val <- mean(var, na.rm = TRUE)
+#     sd_val <- sd(var, na.rm = TRUE)
+#     se_val <- sd_val / sqrt(n)
+#     return(c(mean = mean_val, sd = sd_val, se = se_val))}
+#   
+#   stats_list <- list(
+#     Host_Biomass = calculate_stats(x$Host_Biomass),
+#     Symbiont_Biomass = calculate_stats(x$Symbiont_Biomass),
+#     Total_Chlorophyll = calculate_stats(x$Total_Chlorophyll),
+#     Host_Protein = calculate_stats(x$Host_Protein),
+#     Holobiont_Protein = calculate_stats(x$Holobiont_Protein),
+#     Symbiont_Density = calculate_stats(x$Symbiont_Density))
+#   
+#   result <- data.frame(timepoint = unique(x$timepoint))
+#   for (var in names(stats_list)) {
+#     result[[paste0(var, "_mean")]] <- stats_list[[var]]["mean"]
+#     result[[paste0(var, "_sd")]] <- stats_list[[var]]["sd"]
+#     result[[paste0(var, "_se")]] <- stats_list[[var]]["se"]}
+#   
+#   return(result)}))
+# 
+# # Convert row names to a column if needed
+# summary_data$timepoint <- rownames(summary_data)
+# rownames(summary_data) <- NULL
+# 
+# # Set the timepoint factor levels in the correct order
+# summary_data$timepoint <- factor(summary_data$timepoint, 
+#                                   levels = c("JANUARY", "FEBRUARY", "MARCH", 
+#                                              "APRIL", "MAY", "JUNE", 
+#                                              "JULY", "AUGUST", "SEPTEMBER", 
+#                                              "OCTOBER"))
+```
+
+# Load in histological data
+```{r}
+#load histo data
+oogen_abundance <- read.csv("gametogenesis_timeseries_analysis/Output/oocyte_abun_data.csv")[-1]
+  
+sperm_abundance <- read.csv("gametogenesis_timeseries_analysis/Output/sperm_abun_data.csv")[-1]
+
+oogen_size <- read.csv("gametogenesis_timeseries_analysis/Output/oogen_size_data.csv")[-1]
+  
+sperm_size <- read.csv("gametogenesis_timeseries_analysis/Output/sperm_size_data.csv")[-1]
+
+```
+
+# Load in light and temperature data
+```{r}
+light.dat <- read.csv("../RAnalysis/output/environmental/mahana_light_data.csv")[, -1]
+
+temp.dat <- read.csv("gametogenesis_timeseries_analysis/Output/mean_temp_data.csv")[, -1]
+
+```
+
+Create downstream plots to use in fully combined figure
+Smoothed temperature plot
+```{r}
+# Convert date.time to POSIXct format
+temp.dat$date.time <- as.POSIXct(temp.dat$date.time, format="%Y-%m-%d %H:%M", tz="UTC")
+
+#filter to not show november 
+temp.dat <- temp.dat %>%
+  filter(month != "Nov")
+
+# Smoothed temperature plot across time
+temp_summary_plot <- temp.dat %>%
+  ggplot(., aes(x=date.time, y= temp)) + 
+  geom_point(colour="gray", size=0.5, alpha=0.05) + 
+  geom_smooth(aes(), se=FALSE, method="gam", colour = "black") + 
+  ylab("Temperature °C") + 
+  xlab("") +
+  scale_x_datetime(date_breaks = "1 months", date_labels = "%b %Y")+
+  theme_classic() + 
+  theme(
+    text=element_text(size=14, colour="black"), 
+    axis.title=element_text(size=18, colour="black", face="bold"), 
+    axis.text.x = element_blank(), # Hide x-axis text labels
+    legend.title=element_text(size=18, colour="black", face="bold")) +
+      ylim(25, 30);temp_summary_plot
+
+```
+
+
+Smoothed light plot 
+```{r}
+# Combine Date and Time columns into a new column named DateTime
+light.dat$DateTime <- with(light.dat, ymd_hms(paste(Date, Time)))
+
+light_summary_plot <- light.dat %>%
+  ggplot(aes(x = DateTime, y = calibrated)) + 
+  geom_point(colour = "darkgray", size = 0.5, alpha = 0.05) + 
+  geom_smooth(se = FALSE, colour = "black") + 
+  ylab(expression("Light Intensity " * (mu*mol~m^{-2}~s^{-1}))) +
+  xlab("") + # This will set the x-axis label but you can remove this line if you want to remove the x-axis title
+  scale_x_datetime(date_breaks = "1 months", date_labels = "%b %Y") +
+  theme_classic() + 
+  theme(text=element_text(size=14, colour="black"), 
+    axis.title=element_text(size=18, colour="black", face="bold"), 
+    axis.text.x = element_blank(), # Hide x-axis text labels
+    legend.title=element_text(size=18, colour="black", face="bold")) +
+  scale_y_continuous(expand = c(0, 0)) +
+  coord_cartesian(ylim = c(1000, 6000));light_summary_plot
+
+```
+
+Physiological variable plots
+Symbiont densities
+```{r}
+# Symbiont densities plot
+sym <- ggplot(summary_data, aes(x = timepoint, y = Symbiont_Density_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Symbiont_Density_mean - Symbiont_Density_se, ymax = Symbiont_Density_mean + Symbiont_Density_se), width = 0.2, color = "black") +
+  xlab("") +
+  ylab(expression(bold(paste("Symbiont Densities cm"^-2)))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))
+
+```
+
+Chlorophyll plot
+```{r}
+# Plot for Total Chlorophyll
+chl <- ggplot(summary_data, aes(x = timepoint, y = Total_Chlorophyll_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Total_Chlorophyll_mean - Total_Chlorophyll_se, ymax = Total_Chlorophyll_mean + Total_Chlorophyll_se), width = 0.2, color = "black") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "solid") +  # Adding a linear trendline
+  xlab("") +
+  ylab(expression(bold(paste("Total Chlorophyll (", mu, "g cm"^-2, ")")))) +  # y-axis label with Greek letter
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))  # Add axis lines
+
+```
+
+Symbiont biomass
+```{r}
+# Plot for Symbiont Biomass
+sym.bio <- ggplot(summary_data, aes(x = timepoint, y = Symbiont_Biomass_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Symbiont_Biomass_mean - Symbiont_Biomass_se, ymax = Symbiont_Biomass_mean + Symbiont_Biomass_se), width = 0.2, color = "black") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "solid") +  # Adding a linear trendline
+  xlab("") +
+  ylab(expression(bold(paste("Symbiont Biomass (mg cm"^-2, ")")))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))  # Add axis lines
+
+```
+
+Host biomass
+```{r}
+# Plot for Host Biomass
+host.bio <- ggplot(summary_data, aes(x = timepoint, y = Host_Biomass_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Host_Biomass_mean - Host_Biomass_se, ymax = Host_Biomass_mean + Host_Biomass_se), width = 0.2, color = "black") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "solid") +  # Adding a linear trendline
+  xlab("") +
+  ylab(expression(bold(paste("Host Biomass (mg cm"^-2, ")")))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))  # Add axis lines
+
+```
+
+
+Host protein
+```{r}
+# Host protein
+host_protein <- ggplot(summary_data, aes(x = timepoint, y = Host_Protein_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Host_Protein_mean - Host_Protein_se, ymax = Host_Protein_mean + Host_Protein_se), width = 0.2, color = "black") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "solid") +  # Adding a linear trendline
+  xlab("") +
+  ylab(expression(bold(paste("Host Protein (mg cm"^-2, ")")))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))  # Add axis lines
+
+```
+
+
+Holobiont protein
+```{r}
+# Plot for Holobiont Protein
+holo_protein <- ggplot(summary_data, aes(x = timepoint, y = Holobiont_Protein_mean)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbar(aes(ymin = Holobiont_Protein_mean - Holobiont_Protein_se, ymax = Holobiont_Protein_mean + Holobiont_Protein_se), width = 0.2, color = "black") +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "solid") +  # Adding a linear trendline
+  xlab("") +
+  ylab(expression(bold(paste("Holobiont Protein (mg cm"^-2, ")")))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(face = "bold", size = 20),
+    axis.text.x = element_blank(),         # Remove x-axis text labels
+    axis.ticks.x = element_blank(),        # Remove x-axis ticks
+    axis.text.y = element_text(size = 20, color = "black"), # Y-axis text labels
+    axis.ticks.y = element_line(color = "black"), # Y-axis ticks
+    strip.text.x = element_text(face = "italic", size = 20),
+    panel.grid.major = element_blank(),    # Remove major gridlines
+    panel.grid.minor = element_blank(),    # Remove minor gridlines
+    panel.border = element_blank(),        # Remove panel border
+    axis.line = element_line(color = "black"))  # Add axis lines
+
+```
+
+
+```{r}
+# Customize environmental and physiological plots to remove x-axis labels and ticks except for the bottom plot
+temp_summary_plot <- temp_summary_plot + theme(axis.title.x = element_blank(), 
+                                     axis.text.x = element_blank(), 
+                                     axis.ticks.x = element_blank(),
+                                     axis.title=element_text(face="bold", size=18),
+                                     axis.text=element_text(size=18, color="black"))
+
+light_summary_plot <- light_summary_plot + theme(axis.title.x = element_blank(), 
+                                   axis.text.x = element_blank(), 
+                                   axis.ticks.x = element_blank(),
+                                   axis.title=element_text(face="bold", size=18),
+                                   axis.text=element_text(size=18, color="black"))
+
+symbplot_cm2 <- symbplot_cm2 + theme(axis.title.x = element_blank(), 
+                                     axis.text.x = element_blank(), 
+                                     axis.ticks.x = element_blank(),
+                                     axis.title=element_text(face="bold", size=18),
+                                     axis.text=element_text(size=18, color="black"))
+
+sym_bio_cm2 <- sym_bio_cm2 + theme(axis.title.x = element_blank(), 
+                                   axis.text.x = element_blank(), 
+                                   axis.ticks.x = element_blank(),
+                                     axis.title=element_text(face="bold", size=18),
+                                     axis.text=element_text(size=18, color="black"))
+
+tot.chl <- tot.chl + theme(axis.title.x = element_blank(), 
+                           axis.text.x = element_blank(), 
+                           axis.ticks.x = element_blank(),
+                           axis.title=element_text(face="bold", size=18),
+                           axis.text=element_text(size=18, color="black"))
+
+host_prot_cm2 <- host_prot_cm2 + theme(axis.title.x = element_blank(), 
+                                       axis.text.x = element_blank(), 
+                                       axis.ticks.x = element_blank(),
+                                       axis.title=element_text(face="bold", size=18),
+                                       axis.text=element_text(size=18, color="black"))
+
+
+holobiont_prot_cm2 <- holobiont_prot_cm2 + theme(axis.title.x = element_blank(), 
+                                                 axis.text.x = element_blank(), 
+                                                 axis.ticks.x = element_blank(),
+                                                 axis.title=element_text(face="bold", size=18),
+                                                 axis.text=element_text(size=18, color="black"))
+
+host_bio_cm2 <- host_bio_cm2 + theme(axis.title=element_text(face="bold", size=18),
+                                                 axis.text=element_text(size=18, color="black"))
+
+# Leave the x-axis labels and ticks for the last plot (host_bio_cm2)
+# No changes needed for host_bio_cm2 as it will display the x-axis
+
+# Combine the physiological and environmmental plots (with x-axis labels only on the bottom plot)
+combined_plot <- (temp_summary_plot / light_summary_plot / symbplot_cm2 / sym_bio_cm2 / tot.chl / host_prot_cm2 / holobiont_prot_cm2 / host_bio_cm2) +
+  plot_layout(ncol = 1, guides = 'collect')
+
+# Save combined plot
+ggsave(filename="gametogenesis_timeseries_analysis/Figures/timeseries_stacked_plot.png", plot=combined_plot, dpi=300, width=10, height=20, units="in")
+```
+
+
+
+
