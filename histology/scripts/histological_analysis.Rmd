@@ -32,7 +32,7 @@ library("patchwork")
 ## Load data & arrange for relative abundance 
 ```{r}
 #load data files
-abundance <- read.csv("histology/data/histological_data.csv", header = T, na.strings = c("", "NA"))
+abundance <- read.csv("../data/histological_data.csv", header = T, na.strings = c("", "NA"))
 
 # organize data make timepoints factors with levels in order for plots and calculate frequency
 df_relative_abundance <- abundance %>%
@@ -92,7 +92,7 @@ oogen2 <- oogen +
 oogen2
 
 # save oogenesis plot
-ggsave("histology/output/oogenesis_abundance_percolony.png", oogen2 , width = 13, height = 8)
+ggsave("../output/oogenesis_abundance_percolony.png", oogen2 , width = 13, height = 8)
 
 
 ```
@@ -114,7 +114,7 @@ spermato <- spermato_df_relative_abundance %>%
   geom_col() +
   facet_wrap(~ timepoint, ncol = 11) +
   theme_bw() +
-  ylab("Relative Abundance of Spermatocytes") +
+  ylab("Relative Abundance of Spermaries") +
   xlab("Colony ID") +
   theme(axis.text.x = element_text(angle = 90, size = 18),  # Increase size of x-axis text
         axis.text.y = element_text(size = 18),  # Increase size of y-axis text
@@ -133,7 +133,7 @@ spermato2 <- spermato +
 spermato2
 
 # save oogenesis plot
-ggsave("histology/output/spermatogenesis_abundance_bycolony.png", spermato2 , width = 13, height = 8)
+ggsave("../output/spermatogenesis_abundance_bycolony.png", spermato2 , width = 13, height = 8)
 
 
 
@@ -198,11 +198,11 @@ oocytes_plot <- oocyte.abund.all %>%
   scale_y_continuous(expand = c(0, 0), limits = c(0, 1)); oocytes_plot
 
 # Save the oocytes plot
-ggsave("histology/output/oocytes_relative_abundance.png", oocytes_plot, width = 13, height = 8)
+ggsave("../output/oocytes_relative_abundance.png", oocytes_plot, width = 13, height = 8)
 
 
 # save dataframe for downstream figure
-write.csv(oocyte.abund.all, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oocyte_abun_data.csv")
+write.csv(oocyte.abund.all, "../../gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oocyte_abun_data.csv")
 
 
 ```
@@ -251,7 +251,7 @@ spermatocytes_plot <- sperm_abun %>%
   geom_col(position = "stack") +  # Stack bars to show relative abundance
   scale_fill_manual(values = color_gradient) +
   theme_bw() +
-  ylab("Relative Abundance of Spermatocytes") +
+  ylab("Relative Abundance of Spermaries") +
   xlab("Timepoint") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 20),  # Rotate x-axis labels 45 degrees and increase size
         axis.text.y = element_text(size = 20),  # Increase size of y-axis text
@@ -265,11 +265,11 @@ spermatocytes_plot <- sperm_abun %>%
 
 
 # Save the spermatocyte plot
-ggsave("histology/output/spermatocyte_relative_abundance.png", spermatocytes_plot, width = 13, height = 8)
+ggsave("../output/spermatocyte_relative_abundance.png", spermatocytes_plot, width = 13, height = 8)
 
 
 # save dataframe for downstream figure
-write.csv(sperm_abun, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_abun_data.csv")
+write.csv(sperm_abun, "../../gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_abun_data.csv")
 
 
 ```
@@ -284,7 +284,7 @@ combined_plot <- (oocytes_plot / spermatocytes_plot) +
 combined_plot <- combined_plot + plot_layout(guides = "collect");combined_plot  # Collect legends into a single legend
 
 # Save the combined plot
-ggsave("histology/output/combined_abundance_plots.png", combined_plot, width = 20, height = 15)
+ggsave("../output/combined_abundance_plots.png", combined_plot, width = 20, height = 15)
 ```
 
 
@@ -380,11 +380,11 @@ oogen <- oogen_size %>%
     strip.text.x = element_text(face = "italic", size = 30)); oogen
 
 # Save the plot as an image
-ggsave("histology/output/oogen.size.month.boxplot.png", oogen, width = 13, height = 8)
+ggsave("../output/oogen.size.month.boxplot.png", oogen, width = 13, height = 8)
 
 
 # save dataframe for downstream figure
-write.csv(oogen_size, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oogen_size_data.csv")
+write.csv(oogen_size, "../../gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oogen_size_data.csv")
 ```
 
 
@@ -469,7 +469,7 @@ sperm <- sperm_size %>%
   geom_point(pch = 21, size = 2, position = position_jitterdodge(0.2)) +
   ylim(0, 120) +
   geom_text(data = timepoint_cld_sperm, aes(label = .group, x = timepoint, y = 1.0 * max_sperm), vjust = -0.5, size = 14, color = "black") +
-  ylab(expression(bold(paste("Spermatocyte Diameter (", mu, "m)")))) +  # Updated label
+  ylab(expression(bold(paste("Spermary Diameter (", mu, "m)")))) +  # Updated label
   xlab("Timepoint") +
   theme_classic() +
   theme(
@@ -480,10 +480,10 @@ sperm <- sperm_size %>%
     strip.text.x = element_text(face = "italic", size = 30)); sperm
 
 # Save the plot as an image
-ggsave("histology/output/sperm.size.month.boxplot.png", sperm, width = 13, height = 8)
+ggsave("../output/sperm.size.month.boxplot.png", sperm, width = 13, height = 8)
 
 # save dataframe for downstream figure
-write.csv(sperm_size, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_size_data.csv")
+write.csv(sperm_size, "../../gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_size_data.csv")
 
 ```
 
@@ -498,7 +498,7 @@ combined_plot <- (oogen / sperm) +
   plot_layout(guides = "collect")  # Collect the legends at the combined level
 
 # Save the combined plot
-ggsave("histology/output/combined_oocyte_sperm_size_plots.png", combined_plot, width = 20, height = 20)
+ggsave("../output/combined_oocyte_sperm_size_plots.png", combined_plot, width = 20, height = 20)
 ```
 
 
