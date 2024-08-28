@@ -64,6 +64,8 @@ host_protein_files<-list.files("../gametogenesis_timeseries/", pattern = "host_p
 holobiont_protein_files<-list.files("../gametogenesis_timeseries/", pattern = "holobiont_protein.csv", recursive=T, full.names=T)
 symb_densities_files<-list.files("../gametogenesis_timeseries/", pattern = "sym_densities.csv", recursive=T, full.names=T)
 chlorophyll_files<-list.files("../gametogenesis_timeseries/", pattern = "chlorophyll.csv", recursive=T, full.names=T)
+homogenate_files<-list.files("../gametogenesis_timeseries/", pattern = "homogenate_vols.csv", recursive=T, full.names=T)
+
 ```
  
 
@@ -133,6 +135,31 @@ for (i in 1:length(chlorophyll_files)){
 
 ```
 
+
+```{r}
+#homogenate files 
+homogenate_dataset <- data.frame()
+
+for (i in 1:length(homogenate_files)){
+  homogenate_df <- read.csv(homogenate_files[i]) #each file will be read in
+  homogenate_dataset <- rbind(homogenate_dataset, homogenate_df) #for each iteration, bind the new data to the building dataset
+}
+
+# Test if differences in homogenates, looking into June chlorophyll issue
+# One-way ANOVA
+anova_result <- aov(homog_vol_ml ~ timepoint, data = homogenate_dataset)
+
+# Summary of ANOVA
+summary(anova_result)
+
+# Post-hoc test (Tukey's HSD)
+tukey_result <- TukeyHSD(anova_result)
+print(tukey_result)
+
+# differences in June compared to other months but no large outliers
+
+```
+
 ```{r}
 #remove files that are not needed from loops
 rm(list = ls(pattern = "*_df"))
@@ -146,7 +173,8 @@ Read in tag metadata frame.
 tags<-read.csv("../metadata/master_metadata_acropora_histology_tags.csv")
 ```
 
-Prepare datasets for merging by renaming columns and spreading dataframes. Each file needs to have one line per colony per response variable in order to merge and should be without site/species columns as these will be added from metadata sheet.   
+Prepare datasets for merging by renaming columns and spreading dataframes. Each file needs to have one line per colony per response variable in order to merge and should be without site/species columns as these will be added from metadata sheet. 
+
 ```{r}
 #biomass data 
 biomass_dataset<- biomass_dataset %>%
@@ -172,7 +200,6 @@ holobiont_protein_dataset<-holobiont_protein_dataset%>%
 holobiont_protein_dataset <- holobiont_protein_dataset %>%
   rename(holobiont_prot_ug.cm2 = prot_ug.cm2)
   
-
 #symbiont densitites
 symb_densities_dataset<-symb_densities_dataset%>%
   select(colony_id, cells.cm2, timepoint)

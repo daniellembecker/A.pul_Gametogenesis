@@ -746,7 +746,10 @@ ACR-426,NA,0,0,0,spermatocyte,7,mahana,December,Rep6,ACR426_20211210,P5,"22,14",
 ACR-458,NA,0,0,0,oocyte,7,mahana,February,Rep3,ACR458_20220215,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-451,NA,0,0,0,spermatocyte,7,mahana,February,Rep1,ACR451_20220215,P5,"22,14",3.6525,microns,
 ACR-458,NA,0,0,0,spermatocyte,7,mahana,February,Rep3,ACR458_20220215,P5,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
-ACR-415,NA,0,0,0,oocyte,6,mahana,February,Rep2,ACR415_20220215,P2,"22,14",3.6525,microns,
+ACR-415,Stage I,45.765,22.354,31.98485282,oocyte,6,mahana,February,Rep2,ACR415_20220215,P2,"22,14",3.6525,microns,
+ACR-415,Stage I,42.113,20.876,29.6504804,oocyte,6,mahana,February,Rep2,ACR415_20220215,P2,"22,14",3.6525,microns,
+ACR-415,Stage I,46.778,23.334,33.03812725,oocyte,6,mahana,February,Rep2,ACR415_20220215,P2,"22,14",3.6525,microns,
+ACR-415,Stage I,48.765,24.556,34.60452774,oocyte,6,mahana,February,Rep2,ACR415_20220215,P2,"22,14",3.6525,microns,
 ACR-415,NA,0,0,0,spermatocyte,6,mahana,February,Rep2,ACR415_20220215,P2,"22,14",3.6525,microns,
 ACR-427,NA,0,0,0,spermatocyte,6,mahana,February,Rep4,ACR427_20220215,P1,"22,14",3.6525,microns,"image not fully loaded in unity, opened on desktop"
 ACR-433,NA,0,0,0,spermatocyte,7,mahana,February,Rep5,ACR433_20220215,P1,"22,14",3.6525,microns,

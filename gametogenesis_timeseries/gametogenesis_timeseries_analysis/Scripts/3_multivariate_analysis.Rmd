@@ -171,6 +171,21 @@ temp.dat <- read.csv("gametogenesis_timeseries_analysis/Output/mean_temp_data.cs
 
 ```
 
+# Load in physiological data
+```{r}
+master<-read.csv("gametogenesis_timeseries_analysis/Output/master_timeseries.csv")
+
+# read in metadata to add patch to master timeseries
+metadata <- read.csv("gametogenesis_timeseries_analysis/master_metadata.csv")
+
+# add ACR- before each tag number
+metadata <- metadata %>%
+  mutate(colony_id = paste0("ACR-", colony_id))
+
+#commbine master and metadata
+master <- left_join(master, metadata)
+```
+
 Create downstream plots to use in fully combined figure
 Smoothed temperature plot
 ```{r}
@@ -434,6 +449,42 @@ combined_plot <- (temp_summary_plot / light_summary_plot / symbplot_cm2 / sym_bi
 ggsave(filename="gametogenesis_timeseries_analysis/Figures/timeseries_stacked_plot.png", plot=combined_plot, dpi=300, width=10, height=20, units="in")
 ```
 
+
+Run models to look at individual impacts of physio on frequency in stage
+```{r}
+# make timepoints numbered
+master_select <- master %>%
+  mutate(Month_Number = case_when(
+    timepoint == "JANUARY" ~ 1,
+    timepoint == "FEBRUARY" ~ 2,
+    timepoint == "MARCH" ~ 3,
+    timepoint == "APRIL" ~ 4,
+    timepoint == "MAY" ~ 5,
+    timepoint == "JUNE" ~ 6,
+    timepoint == "JULY" ~ 7,
+    timepoint == "AUGUST" ~ 8,
+    timepoint == "SEPTEMBER" ~ 9,
+    timepoint == "OCTOBER" ~ 10,
+    TRUE ~ NA_integer_))  %>% 
+  dplyr::select(colony_id, Month_Number, timepoint, Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Total_Chl_cm2, host_prot_mg.cm2, holobiont_prot_mg.cm2, cells.cm2)
+
+# get the means per timepoint for all these physiological variables
+master_means <- master_select %>%
+  group_by(timepoint, Month_Number) %>%
+  dplyr::summarise(across(c(Host_AFDW.mg.cm2, Sym_AFDW.mg.cm2, Total_Chl_cm2, 
+                     host_prot_mg.cm2, holobiont_prot_mg.cm2, cells.cm2), 
+                   list(mean = ~mean(., na.rm = TRUE),
+                        se = ~sd(., na.rm = TRUE) / sqrt(n()))),
+            .groups = "drop") %>%
+  arrange(Month_Number)
+
+
+
+
+
+
+
+```
 
 
 
