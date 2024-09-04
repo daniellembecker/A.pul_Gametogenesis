@@ -1,0 +1,28 @@
+{
+    "id": "B7DB946D",
+    "path": "~/Desktop/Putnam_Lab/A.pul_Gametogenesis/gametogenesis_timeseries/gametogenesis_timeseries_analysis/Scripts/2_univariate_analyses.Rmd",
+    "project_path": "gametogenesis_timeseries_analysis/Scripts/2_univariate_analyses.Rmd",
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1725486574120.0,
+    "source_on_save": false,
+    "relative_order": 3,
+    "properties": {
+        "chunk_output_type": "consoles",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "639,67",
+        "scrollLine": "630",
+        "working_dir": "project"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1725486965,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1725486965052,
+    "read_only": false,
+    "read_only_alternatives": []
+}
