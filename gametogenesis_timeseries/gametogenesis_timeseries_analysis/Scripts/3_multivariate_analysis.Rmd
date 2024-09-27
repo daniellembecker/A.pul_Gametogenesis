@@ -666,6 +666,7 @@ summary(spermatogenesis_model)
 # testing parallel regression assumption using Brant's test
 brant(spermatogenesis_model)
 
+
 ```
 
 Chl_cells and host protein do not meet assumptions of the Brant's test and show variable relationships with stages, try a partial proportional odds model
