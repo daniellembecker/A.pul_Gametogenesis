@@ -1,7 +1,6 @@
 ---
 title: "Multivariate analysis of gametogenesis physiological, reproductive, and environmental data"
-author: "Ariana S Huffmyer, E5 RoL Team"
-edited: "DM Becker"
+author: "DM Becker"
 date: "20240709"
 output: 
   html_document:
@@ -692,9 +691,9 @@ ggplot(model_coefs, aes(x = term, y = estimate)) +
 
 Chl_cells and host protein do not meet assumptions of the Brant's test and show variable relationships with stages, try a partial proportional odds model
 
-For oogenesis
+For oogenesis use a generalized orgered logit model
 ```{r}
-# Fit the generalized ordered logit model
+# Fit the generalized ordered logistic regression
 oogen_model <- vglm(Stage ~ Host_AFDW.mg.cm2 + Sym_AFDW.mg.cm2 + 
               host_prot_mg.cm2 + chl_cells_combined,
               family = cumulative(parallel = FALSE, reverse = TRUE),
@@ -738,12 +737,26 @@ oogen_plot <- ggplot(coef_df_oogen, aes(x = factor(stage), y = coef, fill = vari
        fill = "Physiological Variable") +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 0, hjust = 0.5),
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10),
+    plot.title = element_text(size = 16),
     legend.position = "bottom",
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     panel.background = element_rect(fill = "white", color = NA),
     plot.background = element_rect(fill = "white", color = NA)); oogen_plot
+
+
+# Save sperm plot with increased size and resolution
+ggsave("gametogenesis_timeseries_analysis/Figures/oogenesis_phys_model_plot.png", 
+       plot = oogen_plot, 
+       width = 10, 
+       height = 8, 
+       dpi = 300, 
+       units = "in")
 
 ```
 
@@ -798,7 +811,7 @@ coef_df_sperm <- coef_df_sperm %>%
   # Reorder variables
   mutate(variable = factor(variable, levels = c("Symbiont and Chlorophyll Combined", "Symbiont Biomass", "Host Biomass", "Host Protein")))
 
-# Create the plot
+# Create the plot with increased text sizes
 sperm_plot <- ggplot(coef_df_sperm, aes(x = factor(stage), y = coef, fill = variable)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.7) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
@@ -810,15 +823,25 @@ sperm_plot <- ggplot(coef_df_sperm, aes(x = factor(stage), y = coef, fill = vari
        fill = "Physiological Variable") +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 0, hjust = 0.5),
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10),
+    plot.title = element_text(size = 16),
     legend.position = "bottom",
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     panel.background = element_rect(fill = "white", color = NA),
     plot.background = element_rect(fill = "white", color = NA)); sperm_plot
 
-
-
+# Save sperm plot with increased size and resolution
+ggsave("gametogenesis_timeseries_analysis/Figures/spermatogenesis_phys_model_plot.png", 
+       plot = sperm_plot, 
+       width = 10, 
+       height = 8, 
+       dpi = 300, 
+       units = "in")
 
 ```
 
