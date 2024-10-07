@@ -666,6 +666,27 @@ summary(spermatogenesis_model)
 # testing parallel regression assumption using Brant's test
 brant(spermatogenesis_model)
 
+# Assuming you have the model results saved as "model"
+library(ggplot2)
+library(broom)
+
+# Tidy the model results
+model_coefs <- tidy(model, conf.int = TRUE)
+
+# Filter out the intercepts for a cleaner plot
+model_coefs <- model_coefs[!grepl("\\|", model_coefs$term), ]
+
+# Plot the coefficients
+ggplot(model_coefs, aes(x = term, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Coefficient Plot for Partial Proportional Odds Model",
+       x = "Predictors", y = "Coefficient Estimate") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red")
+
+
 
 ```
 
@@ -673,25 +694,129 @@ Chl_cells and host protein do not meet assumptions of the Brant's test and show 
 
 For oogenesis
 ```{r}
-# Fit the partial proportional odds model
-oogenesis_ppom <- vglm(Stage ~ Host_AFDW.mg.cm2 + Sym_AFDW.mg.cm2 + 
-                       host_prot_mg.cm2 + chl_cells_combined,
-                       family = cumulative(parallel = TRUE ~ Host_AFDW.mg.cm2 + Sym_AFDW.mg.cm2 - 1),
-                       data = oogenesis_data)
+# Fit the generalized ordered logit model
+oogen_model <- vglm(Stage ~ Host_AFDW.mg.cm2 + Sym_AFDW.mg.cm2 + 
+              host_prot_mg.cm2 + chl_cells_combined,
+              family = cumulative(parallel = FALSE, reverse = TRUE),
+              data = oogenesis_data, weights = weight)
 
 # Summary of the model
-summary(oogenesis_ppom)
+summary(oogen_model)
 
+# Extract coefficients
+coef_df <- data.frame(
+  coef = coef(oogen_model),
+  variable = names(coef(oogen_model))
+)
 
-# For oogenesis
-AIC(oogenesis_ppom)
-AIC(oogenesis_model)  # Your original polr model
+# Separate variable name and stage, and update variable names
+coef_df <- coef_df %>%
+  separate(variable, into = c("variable", "stage"), sep = ":") %>%
+  filter(variable != "(Intercept)") %>%
+  mutate(
+    stage = as.numeric(stage),
+    variable = case_when(
+      variable == "chl_cells_combined" ~ "Symbiont and Chlorophyll Combined",
+      variable == "host_prot_mg.cm2" ~ "Host Protein",
+      variable == "Host_AFDW.mg.cm2" ~ "Host Biomass",
+      variable == "Sym_AFDW.mg.cm2" ~ "Symbiont Biomass",
+      TRUE ~ variable
+    )
+  ) %>%
+  # Reorder variables
+  mutate(variable = factor(variable, levels = c("Symbiont and Chlorophyll Combined", "Symbiont Biomass", "Host Biomass", "Host Protein")))
+
+# Create the plot
+oogen_plot <- ggplot(coef_df, aes(x = factor(stage), y = coef, fill = variable)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = 1.5:5.5, color = "gray50", linetype = "solid") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(x = "Oogenesis Stage", 
+       y = "Coefficient Value",
+       title = "Effects of Physiological Variables on Oogenesis Stages",
+       fill = "Physiological Variable") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),
+    legend.position = "bottom",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA)); oogen_plot
+
 ```
 
 For spermatogenesis
 ```{r}
+# Fit the generalized ordered logit model
+
+spermatogenesis_data_clean <- na.omit(spermatogenesis_data)
+
+
+spermatogenesis_data_clean$Stage <- factor(spermatogenesis_data_clean$Stage, 
+                                           levels = c("Stage 0", "Stage I", "Stage II", "Stage III", "Stage IV", "Stage V"), 
+                                           ordered = TRUE)
+
+# List of physiological variables to scale
+phys_vars <- c("Host_AFDW.mg.cm2", "Sym_AFDW.mg.cm2", "host_prot_mg.cm2", "chl_cells_combined")
+
+spermatogenesis_data_clean <- spermatogenesis_data_clean[spermatogenesis_data_clean$weight > 0, ]
+
+# Scale the variables
+spermatogenesis_data_clean[phys_vars] <- lapply(spermatogenesis_data_clean[phys_vars], scale)
+
+sperm_model <- vglm(Stage ~ Host_AFDW.mg.cm2 + Sym_AFDW.mg.cm2 + 
+              host_prot_mg.cm2 + chl_cells_combined,
+              family = cumulative(parallel = FALSE, reverse = TRUE),
+              data = spermatogenesis_data_clean)
+
+# Summary of the model
+summary(sperm_model)
+
+
+# Extract coefficients
+coef_df <- data.frame(
+  coef = coef(sperm_model),
+  variable = names(coef(sperm_model))
+)
+
+# Separate variable name and stage, and update variable names
+coef_df <- coef_df %>%
+  separate(variable, into = c("variable", "stage"), sep = ":") %>%
+  filter(variable != "(Intercept)") %>%
+  mutate(
+    stage = as.numeric(stage),
+    variable = case_when(
+      variable == "chl_cells_combined" ~ "Symbiont and Chlorophyll Combined",
+      variable == "host_prot_mg.cm2" ~ "Host Protein",
+      variable == "Host_AFDW.mg.cm2" ~ "Host Biomass",
+      variable == "Sym_AFDW.mg.cm2" ~ "Symbiont Biomass",
+      TRUE ~ variable
+    )
+  ) %>%
+  # Reorder variables
+  mutate(variable = factor(variable, levels = c("Symbiont and Chlorophyll Combined", "Symbiont Biomass", "Host Biomass", "Host Protein")))
+
+# Create the plot
+sperm_plot <- ggplot(coef_df, aes(x = factor(stage), y = coef, fill = variable)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = 1.5:5.5, color = "gray50", linetype = "solid") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(x = "Spermatogenesis Stage", 
+       y = "Coefficient Value",
+       title = "Effects of Physiological Variables on Spermatogenesis Stages",
+       fill = "Physiological Variable") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),
+    legend.position = "bottom",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA)); sperm_plot
+
 
 ```
-
-
 
