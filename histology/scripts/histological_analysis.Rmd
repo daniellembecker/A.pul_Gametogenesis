@@ -502,46 +502,76 @@ ggsave("histology/output/combined_oocyte_sperm_size_plots.png", combined_plot, w
 ```
 
 
-# Calculate relative abundance change overtime with multinominal logistic regression
+# Calculate relative abundance change overtime with multinominal logistic regression for oogenesis
 ```{r}
-# Use abundance clean dataframe for oocytes and spermaries
-oocyte_data <- oocyte.abund.all
-spermatocyte_data <- sperm_abun
-
 # Use multinominal logistic regresssion to compare chnage in relative abundance overtime due to time as a predictor, categorical dependent variable and ordinal nature of stages
-multinom_model <- multinom(Stage ~ timepoint, data = oogen_df_relative_abundance, weights = freq)
-model_summary <- summary(multinom_model_with_colony)
+multinom_model_oogen <- multinom(Stage ~ timepoint, data = oogen_df_relative_abundance, weights = freq)
+model_summary_oogen <- summary(multinom_model_oogen)
 
 #The multinom package does not include p-value calculation for the regression coefficients, so we calculate p-values using Wald tests (here z-tests).
 # Extract coefficients and standard errors
-coefficients <- model_summary$coefficients
-std_errors <- model_summary$standard.errors
+coefficients_oogen <- model_summary_oogen$coefficients
+std_errors_oogen <- model_summary_oogen$standard.errors
 
 # Calculate z-scores
-z_scores <- coefficients / std_errors
+z_scores_oogen <- coefficients_oogen / std_errors_oogen
 
 # Calculate two-tailed p-values
-p_values <- 2 * (1 - pnorm(abs(z_scores)))
+p_values_oogen <- 2 * (1 - pnorm(abs(z_scores_oogen)))
 
 # Create a data frame with coefficients, standard errors, z-scores, and p-values
-results <- data.frame(
-  Coefficient = as.vector(coefficients),
-  Std_Error = as.vector(std_errors),
-  z_value = as.vector(z_scores),
-  p_value = as.vector(p_values)
+results_oogen <- data.frame(
+  Coefficient = as.vector(coefficients_oogen),
+  Std_Error = as.vector(std_errors_oogen),
+  z_value = as.vector(z_scores_oogen),
+  p_value = as.vector(p_values_oogen)
 )
 
 # Add row and column names
-row.names(results) <- paste(rep(row.names(coefficients), each = ncol(coefficients)),
-                            rep(colnames(coefficients), nrow(coefficients)),
+row.names(results_oogen) <- paste(rep(row.names(coefficients_oogen), each = ncol(coefficients_oogen)),
+                            rep(colnames(coefficients_oogen), nrow(coefficients_oogen)),
                             sep = ":")
 
-print(results)
-
+print(results_oogen)
 
 ```
 
 
+
+# Calculate relative abundance change overtime with multinominal logistic regression for spermatogenesis
+```{r}
+# Use multinominal logistic regresssion to compare chnage in relative abundance overtime due to time as a predictor, categorical dependent variable and ordinal nature of stages
+multinom_model_sperm <- multinom(Stage ~ timepoint, data = spermatocyte_data, weights = freq)
+model_summary_sperm <- summary(multinom_model_sperm)
+
+#The multinom package does not include p-value calculation for the regression coefficients, so we calculate p-values using Wald tests (here z-tests).
+# Extract coefficients and standard errors
+coefficients_sperm <- model_summary_sperm$coefficients
+std_errors_sperm <- model_summary_sperm$standard.errors
+
+# Calculate z-scores
+z_scores_sperm <- coefficients_sperm / std_errors_sperm
+
+# Calculate two-tailed p-values
+p_values_sperm <- 2 * (1 - pnorm(abs(z_scores_sperm)))
+
+# Create a data frame with coefficients, standard errors, z-scores, and p-values
+results_sperm <- data.frame(
+  Coefficient = as.vector(coefficients_sperm),
+  Std_Error = as.vector(std_errors_sperm),
+  z_value = as.vector(z_scores_sperm),
+  p_value = as.vector(p_values_sperm)
+)
+
+# Add row and column names
+row.names(results_sperm) <- paste(rep(row.names(coefficients_sperm), each = ncol(coefficients_sperm)),
+                            rep(colnames(coefficients_sperm), nrow(coefficients_sperm)),
+                            sep = ":")
+
+print(results_sperm)
+
+
+```
 
 
 
