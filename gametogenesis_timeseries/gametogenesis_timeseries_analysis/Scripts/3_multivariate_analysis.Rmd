@@ -704,13 +704,13 @@ oogen_model <- vglm(Stage ~ Host_AFDW.mg.cm2 + Sym_AFDW.mg.cm2 +
 summary(oogen_model)
 
 # Extract coefficients
-coef_df <- data.frame(
+coef_df_oogen <- data.frame(
   coef = coef(oogen_model),
   variable = names(coef(oogen_model))
 )
 
 # Separate variable name and stage, and update variable names
-coef_df <- coef_df %>%
+coef_df_oogen <- coef_df_oogen %>%
   separate(variable, into = c("variable", "stage"), sep = ":") %>%
   filter(variable != "(Intercept)") %>%
   mutate(
@@ -727,11 +727,11 @@ coef_df <- coef_df %>%
   mutate(variable = factor(variable, levels = c("Symbiont and Chlorophyll Combined", "Symbiont Biomass", "Host Biomass", "Host Protein")))
 
 # Create the plot
-oogen_plot <- ggplot(coef_df, aes(x = factor(stage), y = coef, fill = variable)) +
+oogen_plot <- ggplot(coef_df_oogen, aes(x = factor(stage), y = coef, fill = variable)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.7) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
   geom_vline(xintercept = 1.5:5.5, color = "gray50", linetype = "solid") +
-  scale_fill_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Dark2") +
   labs(x = "Oogenesis Stage", 
        y = "Coefficient Value",
        title = "Effects of Physiological Variables on Oogenesis Stages",
@@ -776,13 +776,13 @@ summary(sperm_model)
 
 
 # Extract coefficients
-coef_df <- data.frame(
+coef_df_sperm <- data.frame(
   coef = coef(sperm_model),
   variable = names(coef(sperm_model))
 )
 
 # Separate variable name and stage, and update variable names
-coef_df <- coef_df %>%
+coef_df_sperm <- coef_df_sperm %>%
   separate(variable, into = c("variable", "stage"), sep = ":") %>%
   filter(variable != "(Intercept)") %>%
   mutate(
@@ -799,11 +799,11 @@ coef_df <- coef_df %>%
   mutate(variable = factor(variable, levels = c("Symbiont and Chlorophyll Combined", "Symbiont Biomass", "Host Biomass", "Host Protein")))
 
 # Create the plot
-sperm_plot <- ggplot(coef_df, aes(x = factor(stage), y = coef, fill = variable)) +
+sperm_plot <- ggplot(coef_df_sperm, aes(x = factor(stage), y = coef, fill = variable)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.7) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
   geom_vline(xintercept = 1.5:5.5, color = "gray50", linetype = "solid") +
-  scale_fill_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Dark2") +
   labs(x = "Spermatogenesis Stage", 
        y = "Coefficient Value",
        title = "Effects of Physiological Variables on Spermatogenesis Stages",
@@ -816,6 +816,8 @@ sperm_plot <- ggplot(coef_df, aes(x = factor(stage), y = coef, fill = variable))
     panel.grid.minor = element_blank(),
     panel.background = element_rect(fill = "white", color = NA),
     plot.background = element_rect(fill = "white", color = NA)); sperm_plot
+
+
 
 
 ```
