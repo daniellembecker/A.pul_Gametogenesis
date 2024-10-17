@@ -732,23 +732,21 @@ oogen_plot <- ggplot(coef_df_oogen, aes(x = factor(stage), y = odd.ratio, fill =
   geom_vline(xintercept = 1.5:5.5, color = "gray50", linetype = "solid") +
   # Add percentage labels for bars with odds ratio > 1
   geom_text(aes(label = ifelse(!is.na(percent_increase), paste0("+", round(percent_increase, 1), "%"), "")), 
-            position = position_dodge(width = 0.8), vjust = -0.5, size = 4) +
+            position = position_dodge(width = 0.8), vjust = -0.5, size = 8) +
   ylim(0,3) +
   # PNW color palette
   scale_fill_manual(values = c("#0072B2", "#009E73", "#D55E00")) +
   labs(x = "Oogenesis Stage", 
-       y = expression("Odds Ratio (" * italic(e)^coefficient * ")", # Y-axis label with italicized e
-       title = "Effects of Physiological Variables on Oogenesis Stages",
-       fill = "Physiological Variable")) +
+       y = expression("Odds Ratio (" * italic(e)^coefficient * ")")) + # Y-axis label with italicized e
+       #title = "Effects of Physiological Variables on Oogenesis Stages",
+       #fill = "Physiological Variable")) +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 24),
-    axis.text.y = element_text(size = 24),
-    axis.title = element_text(size = 24),
-    legend.title = element_text(size = 22),
-    legend.text = element_text(size = 18),
-    plot.title = element_text(size = 26),
-    legend.position = "bottom",
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 30),
+    axis.text.y = element_text(size = 30),
+    axis.title = element_text(size = 30),
+    plot.title = element_text(size = 32),
+    legend.position = "none",
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     panel.background = element_rect(fill = "white", color = NA),
@@ -839,21 +837,21 @@ sperm_plot <- ggplot(coef_df_sperm, aes(x = factor(stage), y = odd.ratio, fill =
   geom_vline(xintercept = 1.5:5.5, color = "gray50", linetype = "solid") +
   # Add percentage labels for bars with odds ratio > 1
   geom_text(aes(label = ifelse(!is.na(percent_increase), paste0("+", round(percent_increase, 1), "%"), "")), 
-            position = position_dodge(width = 0.8), vjust = -0.5, size = 4) +
+            position = position_dodge(width = 0.8), vjust = -0.5, size = 8) +
   # PNW color palette
   scale_fill_manual(values = c("#0072B2", "#009E73", "#D55E00")) +
   labs(x = "Spermatogenesis Stage", 
        y = expression("Odds Ratio (" * italic(e)^coefficient * ")"),  # Y-axis label with italicized e
-       title = "Effects of Physiological Variables on Spermatogenesis Stages",
+       #title = "Effects of Physiological Variables on Spermatogenesis Stages",
        fill = "Physiological Variable") +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 24),
-    axis.text.y = element_text(size = 24),
-    axis.title = element_text(size = 24),
-    legend.title = element_text(size = 22),
-    legend.text = element_text(size = 18),
-    plot.title = element_text(size = 26),
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 30),
+    axis.text.y = element_text(size = 30),
+    axis.title = element_text(size = 30),
+    plot.title = element_text(size = 32),
+    legend.title = element_text(size = 30),
+    legend.text = element_text(size = 26),
     legend.position = "bottom",
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
@@ -870,3 +868,17 @@ ggsave("gametogenesis_timeseries_analysis/Figures/spermatogenesis_phys_model_plo
 
 ```
 
+
+# Combine spermato and oogen size plots with patchwork
+```{r}
+# Combine plots using patchwork with a shared x-axis, tags, and centered axis labels
+combined_plot_odds <- (oogen_plot / sperm_plot) +
+  plot_annotation(tag_levels = 'A') &
+  theme(
+    plot.tag = element_text(size = 50, face = "bold")  # Adjust tag text style here
+  ) +
+  plot_layout(guides = "collect")  # Collect the legends at the combined level
+
+# Save the combined plot
+ggsave("gametogenesis_timeseries_analysis/Figures/combined_odds_ratio_plots.png", combined_plot_odds, width = 20, height = 20)
+```
