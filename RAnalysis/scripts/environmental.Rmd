@@ -436,6 +436,8 @@ mcr <- mcr %>%
     month = month(date, label = TRUE, abbr = TRUE),
     air_temp_C = na_if(air_temp_C, -999),
     cumulative_rainfall_mm = na_if(cumulative_rainfall_mm, -999),
+    wind_U_mps = ifelse(wind_U_mps %in% c(-999, 999), NA, wind_U_mps),
+    wind_V_mps = ifelse(wind_V_mps %in% c(-999, 999), NA, wind_V_mps),
     wind_speed = sqrt(wind_U_mps^2 + wind_V_mps^2)
   )
 
@@ -525,9 +527,9 @@ p_temp <- ggplot(temp_monthly, aes(x = month, y = mean_temp, group = 1)) +
                     ymax = mean_temp + temp_se),
                 width = 0.2, color = "#D95F5F") +
   geom_vline(xintercept = season_x, color = "#CC4C4C", linewidth = 1) +
-  annotate("text", x = 2, y = -Inf, label = "cool", vjust = -1.2,
+  annotate("text", x = 2, y = -Inf, label = "warm", vjust = -1.2,
            color = "#CC4C4C", fontface = "bold", size = 5) +
-  annotate("text", x = 8, y = -Inf, label = "warm", vjust = -1.2,
+  annotate("text", x = 8, y = -Inf, label = "cool", vjust = -1.2,
            color = "#CC4C4C", fontface = "bold", size = 5) +
   theme_classic() +
   labs(title = "Temperature", y = "Temperature (°C)", x = "Month") +
@@ -546,9 +548,9 @@ p_par <- ggplot(temp_monthly, aes(x = month, y = mean_light, group = 1)) +
                     ymax = mean_light + light_se),
                 width = 0.2, color = "#D95F5F") +
   geom_vline(xintercept = season_x, color = "#CC4C4C", linewidth = 1) +
-  annotate("text", x = 2, y = -Inf, label = "cool", vjust = -1.2,
+  annotate("text", x = 2, y = -Inf, label = "warm", vjust = -1.2,
            color = "#CC4C4C", fontface = "bold", size = 5) +
-  annotate("text", x = 8, y = -Inf, label = "warm", vjust = -1.2,
+  annotate("text", x = 8, y = -Inf, label = "cool", vjust = -1.2,
            color = "#CC4C4C", fontface = "bold", size = 5) +
   theme_classic() +
   labs(title = "PAR", y = expression(atop("Photosynthetic Photon Flux Density",
@@ -569,9 +571,9 @@ p_precip <- ggplot(mcr_monthly, aes(x = month, y = mean_precip, group = 1)) +
                     ymax = mean_precip + se_precip),
                 width = 0.2, color = "#D95F5F") +
   geom_vline(xintercept = season_x, color = "#CC4C4C", linewidth = 1) +
-  annotate("text", x = 2, y = -Inf, label = "cool", vjust = -1.2,
+  annotate("text", x = 2, y = -Inf, label = "warm", vjust = -1.2,
            color = "#CC4C4C", fontface = "bold", size = 5) +
-  annotate("text", x = 8, y = -Inf, label = "warm", vjust = -1.2,
+  annotate("text", x = 8, y = -Inf, label = "cool", vjust = -1.2,
            color = "#CC4C4C", fontface = "bold", size = 5) +
   theme_classic() +
   labs(title = "Precipitation", y = "mm/mo", x = "Month") +
@@ -590,9 +592,9 @@ p_wind <- ggplot(mcr_monthly, aes(x = month, y = mean_wind, group = 1)) +
                     ymax = mean_wind + se_wind),
                 width = 0.2, color = "#D95F5F") +
   geom_vline(xintercept = season_x, color = "#CC4C4C", linewidth = 1) +
-  annotate("text", x = 2, y = -Inf, label = "cool", vjust = -1.2,
+  annotate("text", x = 2, y = -Inf, label = "warm", vjust = -1.2,
            color = "#CC4C4C", fontface = "bold", size = 5) +
-  annotate("text", x = 8, y = -Inf, label = "warm", vjust = -1.2,
+  annotate("text", x = 8, y = -Inf, label = "cool", vjust = -1.2,
            color = "#CC4C4C", fontface = "bold", size = 5) +
   theme_classic() +
   labs(title = "Wind Speed", y = "m/s", x = "Month") +
@@ -604,6 +606,8 @@ p_wind <- ggplot(mcr_monthly, aes(x = month, y = mean_wind, group = 1)) +
 
 p_wind 
 
+season_x <- 2.5  # between Apr and May
+
 p_photo <- ggplot(photoperiod_monthly, aes(x = month, y = mean_photoperiod, group = 1)) +
   geom_line(color = "#4C89C6", linewidth = 1) +
   geom_point(color = "#4C89C6", size = 3) +
@@ -611,25 +615,25 @@ p_photo <- ggplot(photoperiod_monthly, aes(x = month, y = mean_photoperiod, grou
                     ymax = mean_photoperiod + se_photoperiod),
                 width = 0.2, color = "#D95F5F") +
   geom_vline(xintercept = season_x, color = "#CC4C4C", linewidth = 1) +
-  annotate("text", x = 2, y = -Inf, label = "cool", vjust = -1.2,
+  annotate("text", x = 1.5, y = -Inf, label = "warm", vjust = -1.2,
            color = "#CC4C4C", fontface = "bold", size = 5) +
-  annotate("text", x = 8, y = -Inf, label = "warm", vjust = -1.2,
+  annotate("text", x = 5.5, y = -Inf, label = "cool", vjust = -1.2,
            color = "#CC4C4C", fontface = "bold", size = 5) +
   theme_classic() +
-  labs(title = "Photoperiod", y = "hr", x = "Month") +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    axis.title = element_text(size = 14),
-    axis.text = element_text(size = 11)
-  )
+  labs(title = "Photoperiod", y = "hr", x = "Month")
 
 p_photo
   
 # FINAL FIGURE 
+bottom_row <- p_photo + plot_spacer()
+
 (p_temp | p_par) /
 (p_precip | p_wind) /
-p_photo
+bottom_row
 ```
+
+
+
 ```{r}
 month_levels <- c("Dec 2021","Jan 2022","Feb 2022","Mar 2022","Apr 2022","May 2022",
                   "Jun 2022","Jul 2022","Aug 2022","Sep 2022","Oct 2022","Nov 2022")
