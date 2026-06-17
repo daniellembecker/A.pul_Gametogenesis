@@ -637,7 +637,7 @@ phys_host_figure <- grid.arrange(arrangeGrob(phys_host_figure, bottom = x.grob))
 ggsave(filename="gametogenesis_timeseries_analysis/Figures/Phys_Host_Figure.png", plot=phys_host_figure, dpi=300, width=45, height=20, units="in")
 
 #make plot of all 
-phys_all_figure<-plot_grid(symbplot_cm2, sym_bio_cm2, tot.chl, host_prot_cm2, host_bio_cm2, ncol=3, nrow=2, labels = c('A', 'B', 'C', 'D', 'E'),label_size = 80,rel_heights= 1, rel_widths = 1, label_y=1, align="h")
+phys_all_figure<-plot_grid(symbplot_cm2, sym_bio_cm2, tot.chl, host_prot_cm2, holobiont_prot_cm2, host_bio_cm2, ncol=2, nrow=3, labels = c('A', 'B', 'C', 'D', 'E', 'F'),label_size = 80,rel_heights= 1, rel_widths = 1, label_y=1, align="h")
 
 #add x label to plot_GRID
 x.grob <- textGrob("TIMEPOINT", 
@@ -646,6 +646,6 @@ x.grob <- textGrob("TIMEPOINT",
 #add to plot
 phys_all_figure <- grid.arrange(arrangeGrob(phys_all_figure, bottom = x.grob))
 
-ggsave(filename="gametogenesis_timeseries_analysis/Figures/Phys_all_Figure.png", plot=phys_all_figure, dpi=300, width=49, height=35, units="in")
+ggsave(filename="gametogenesis_timeseries_analysis/Figures/Phys_all_Figure.png", plot=phys_all_figure, dpi=300, width=40, height=48, units="in")
 ```
 

@@ -24,7 +24,7 @@ if (!require("devtools")) install.packages("devtools")
 # Load devtools
 library(devtools)
 # Install LoLinR from GitHub
-devtools::install_github("colin-olito/LoLinR")
+install_github('colin-olito/LoLinR')
 library("LoLinR")
 library("lubridate")
 library('tidyverse')
@@ -144,7 +144,9 @@ temp.dat <- temp.data %>%
 #group data by month and summarise for mean temp per month
 mean_temp_per_month <- temp.dat %>%
   group_by(month) %>%
-  summarise(mean_temp = mean(temp, na.rm = TRUE)) %>%
+  summarise(
+    mean_temp = mean(temp, na.rm = TRUE),
+    standard_error = sd(temp, na.rm = TRUE) / sqrt(n())) %>%
   arrange(match(month, month.abb))  # Sort the data by month in ascending order
 
 # Plot mean sea surface temperature per month as a dot and line plot
@@ -256,9 +258,12 @@ mean_light_per_day <- light.data.sep %>%
 light.data.sep$Date <- as.Date(light.data.sep$Date)
 
 # Calculate mean light per month
+# Calculate mean light and standard error per month
 mean_light_per_month <- light.data.sep %>%
   group_by(month = format(Date, "%Y-%m")) %>%
-  summarise(mean_light = mean(calibrated))
+  summarise(
+    mean_light = mean(calibrated, na.rm = TRUE),
+    standard_error = sd(calibrated, na.rm = TRUE) / sqrt(n()))
 
 ```
 
@@ -347,45 +352,324 @@ write.csv(light.data, "gametogenesis_timeseries/gametogenesis_timeseries_analysi
 # Make a commbined plot of light and temperature
 
 ```{r}
-# Combine light and temperature data dual axes
-# Joining the data frames
+# Convert month from YYYY-MM to just month names (e.g., Jan) in mean_light_per_month
+#mean_light_per_month$month <- format(as.Date(paste0(mean_light_per_month$month, "-01")), "%b")
+
+# Join the data frames by month
 mean_monthly_data <- full_join(mean_light_per_month, mean_temp_per_month, by = "month")
 
-# Remove NAs only from mean_light column
-mean_monthly_data_light <- mean_monthly_data[!is.na(mean_monthly_data$mean_light), ]
+# Ensure month is a factor for proper ordering in the plot
+mean_monthly_data$month <- factor(mean_monthly_data$month,
+                                   levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                              "Jul", "Aug", "Sep", "Oct"))
 
-# Plotting code
+# Calculate transformed light intensity and temperature for plotting
+mean_monthly_data <- mean_monthly_data %>%
+    mutate(transformed_light = (mean_light - 2000) / 833 + 26,
+        light_se = standard_error / 833,
+        transformed_temp = mean_temp,
+        temp_se = standard_error)
+
+# Adjusted plotting code with focus on visibility
 light.temp <- ggplot(mean_monthly_data, aes(x = month)) +
-  geom_point(aes(y = mean_temp, color = "Temperature", group = 1), size = 3) +  # Add points for temperature
-  geom_line(aes(y = mean_temp, color = "Temperature", group = 1)) +  # Add lines for temperature
-  geom_point(aes(y = (mean_light - 2000) / 833 + 26, color = "Light Intensity", group = 1), size = 3) +  # Add points for light intensity
-  geom_line(aes(y = (mean_light - 2000) / 833 + 26, color = "Light Intensity", group = 1)) +  # Add lines for light intensity
-  scale_y_continuous(
-    sec.axis = sec_axis(~ (. - 26) * 833 + 2000, name = expression(atop("Photosynthetic Photon Flux Density", (mu*mol~photons~m^{-2}~s^{-1})))), name = "Temperature (°C)",
-    limits = c(26, 29)) + # Set limits for the primary y-axis)) 
-  scale_color_manual(values = c("Temperature" = "black", "Light Intensity" = "grey")) +  # Set colors
-  labs(x = "Month", y = NULL) +
-  theme_classic() +
-  labs(color = "Environmental Data") +
-  theme(legend.position = ("none"),
-    axis.title.y = element_text(color = "black", size = 18),
-    axis.text.y = element_text(color = "black", size = 18),
-    axis.title.x = element_text(color = "black", size = 18),
-    axis.text.x = element_text(color = "black", size = 18),
-    axis.title.y.right = element_text(color = "darkgrey", size = 18),
-    axis.text.y.right = element_text(color = "darkgrey", size = 18))
+  
+    # Temperature points and error bars
+    geom_point(aes(y = transformed_temp, color = "Temperature"), size = 3) +  
+    geom_errorbar(aes(y = transformed_temp,
+                      ymin = transformed_temp - temp_se,
+                      ymax = transformed_temp + temp_se,
+                      color = "Temperature"), 
+                   width = 0.2) +  
+  
+    # Light intensity points and error bars
+    geom_point(aes(y = transformed_light, color = "Light Intensity"), size = 3) +  
+    geom_errorbar(aes(y = transformed_light,
+                      ymin = transformed_light - light_se,
+                      ymax = transformed_light + light_se,
+                      color = "Light Intensity"), 
+                   width = 0.2) +  
+
+    # Set up y-axes with adjusted limits
+    scale_y_continuous(
+        sec.axis = sec_axis(~ (. - 26) * 833 + 2000,
+                            name = expression(atop("Photosynthetic Photon Flux Density",
+                                                    (mu*mol~photons~m^{-2}~s^{-1})))), 
+        name = "Temperature (°C)",
+        limits = c(25.5, 29)  # Adjust limits for better visibility
+    ) +  
+
+    # Color settings and labels
+    scale_color_manual(values = c("Temperature" = "black", "Light Intensity" = "grey")) +
+    labs(x = "Month", y = NULL) +
+    theme_classic() +
+    labs(color = "Environmental Data") +
+    theme(legend.position = "none",
+          axis.title.y = element_text(color = "black", size = 18),
+          axis.text.y = element_text(color = "black", size = 18),
+          axis.title.x = element_text(color = "black", size = 18),
+          axis.text.x = element_text(color = "black", size = 18),
+          axis.title.y.right = element_text(color = "darkgrey", size = 18),
+          axis.text.y.right = element_text(color = "darkgrey", size = 18))
 
 light.temp
 
 # save mean temp per month plot
 #ggsave("RAnalysis/output/environmental/mean.light.temp.pdf", light.temp , width = 10, height = 6)
-ggsave("RAnalysis/output/environmental/mean.light.temp.png", light.temp , width = 10, height = 6)
+ggsave("RAnalysis/output/environmental/mean.light.temp.png", light.temp , width = 10, height = 8)
 
 
 
 ```
 
+# Making wind speed and precip plost from MCR and adding light and temp separate plots from our data and using PAR to calculate photoperiod
+
+```{r}
+# Load MCR data from https://portal.edirepository.org/nis/mapbrowse?packageid=knb-lter-mcr.9.54
+
+mcr <- read.csv("../../../Desktop/Gump_MetData_5_min_average_20251007.csv", stringsAsFactors = FALSE)
+
+mcr <- mcr %>%
+  mutate(
+    time_local = ymd_hms(time_local),
+    time_utc = ymd_hms(time_utc),
+    date = as.Date(time_local),
+    month = month(date, label = TRUE, abbr = TRUE),
+    air_temp_C = na_if(air_temp_C, -999),
+    cumulative_rainfall_mm = na_if(cumulative_rainfall_mm, -999),
+    wind_speed = sqrt(wind_U_mps^2 + wind_V_mps^2)
+  )
+
+mcr_monthly <- mcr %>%
+  group_by(month) %>%
+  summarise(
+    mean_precip = mean(cumulative_rainfall_mm, na.rm = TRUE),
+    se_precip = sd(cumulative_rainfall_mm, na.rm = TRUE) / sqrt(sum(!is.na(cumulative_rainfall_mm))),
+    mean_wind = mean(wind_speed, na.rm = TRUE),
+    se_wind = sd(wind_speed, na.rm = TRUE) / sqrt(sum(!is.na(wind_speed))),
+    .groups = "drop"
+  ) %>%
+  mutate(month = factor(month, levels = month.abb))
+
+```
 
 
+```{r}
+#PHOTOPERIOD (FROM PAR — KEY STEP): daily light window: We define photoperiod as: first PAR > threshold → last PAR > threshold (use threshold to avoid sensor noise)
 
+threshold <- 5
+
+light.data <- light.data %>%
+  mutate(
+    DateTime = parse_date_time(DateTime, orders = c("ymd HMS", "ymd HM", "ymd H"), tz = "UTC"),
+    date = as.Date(DateTime)
+  )
+
+photoperiod_daily <- light.data %>%
+  group_by(date) %>%
+  summarise(
+    first_light = ifelse(
+      any(calibrated > threshold, na.rm = TRUE),
+      min(DateTime[calibrated > threshold], na.rm = TRUE),
+      NA
+    ),
+    last_light = ifelse(
+      any(calibrated > threshold, na.rm = TRUE),
+      max(DateTime[calibrated > threshold], na.rm = TRUE),
+      NA
+    ),
+    photoperiod_h = as.numeric(difftime(last_light, first_light, units = "hours")),
+    .groups = "drop"
+  ) %>%
+  filter(!is.na(photoperiod_h) & is.finite(photoperiod_h))
+
+photoperiod_monthly <- photoperiod_daily %>%
+  mutate(
+    month = factor(month(date, label = TRUE, abbr = TRUE), levels = month.abb)
+  ) %>%
+  group_by(month) %>%
+  summarise(
+    mean_photoperiod = mean(photoperiod_h, na.rm = TRUE),
+    se_photoperiod = sd(photoperiod_h, na.rm = TRUE) / sqrt(sum(!is.na(photoperiod_h))),
+    .groups = "drop"
+  ) %>%
+  mutate(month = factor(month, levels = month.abb))
+
+
+```
+
+# Plot temperature, light intensity (PAR), precipitation, wind speed, photoperiod (Van Woesik method)
+
+```{r}
+
+# Make sure month structure is correct for mean monthly data
+# Temperature
+mean_monthly_data <- mean_monthly_data %>%
+  mutate(month = factor(month, levels = month.abb))
+
+month_levels <- month.abb
+season_x <- 4.5  # between Apr and May
+
+temp_monthly <- mean_monthly_data %>%
+  mutate(month = factor(month, levels = month_levels))
+
+mcr_monthly <- mcr_monthly %>%
+  mutate(month = factor(month, levels = month_levels))
+
+photoperiod_monthly <- photoperiod_monthly %>%
+  mutate(month = factor(month, levels = month_levels))
+
+p_temp <- ggplot(temp_monthly, aes(x = month, y = mean_temp, group = 1)) +
+  geom_line(color = "#4C89C6", linewidth = 1) +
+  geom_point(color = "#4C89C6", size = 3) +
+  geom_errorbar(aes(ymin = mean_temp - temp_se,
+                    ymax = mean_temp + temp_se),
+                width = 0.2, color = "#D95F5F") +
+  geom_vline(xintercept = season_x, color = "#CC4C4C", linewidth = 1) +
+  annotate("text", x = 2, y = -Inf, label = "cool", vjust = -1.2,
+           color = "#CC4C4C", fontface = "bold", size = 5) +
+  annotate("text", x = 8, y = -Inf, label = "warm", vjust = -1.2,
+           color = "#CC4C4C", fontface = "bold", size = 5) +
+  theme_classic() +
+  labs(title = "Temperature", y = "Temperature (°C)", x = "Month") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 11)
+  )
+
+p_temp
+
+p_par <- ggplot(temp_monthly, aes(x = month, y = mean_light, group = 1)) +
+  geom_line(color = "#4C89C6", linewidth = 1) +
+  geom_point(color = "#4C89C6", size = 3) +
+  geom_errorbar(aes(ymin = mean_light - light_se,
+                    ymax = mean_light + light_se),
+                width = 0.2, color = "#D95F5F") +
+  geom_vline(xintercept = season_x, color = "#CC4C4C", linewidth = 1) +
+  annotate("text", x = 2, y = -Inf, label = "cool", vjust = -1.2,
+           color = "#CC4C4C", fontface = "bold", size = 5) +
+  annotate("text", x = 8, y = -Inf, label = "warm", vjust = -1.2,
+           color = "#CC4C4C", fontface = "bold", size = 5) +
+  theme_classic() +
+  labs(title = "PAR", y = expression(atop("Photosynthetic Photon Flux Density",
+                                           (mu*mol~photons~m^{-2}~s^{-1}))),
+       x = "Month") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 11)
+  )
+
+p_par
+
+p_precip <- ggplot(mcr_monthly, aes(x = month, y = mean_precip, group = 1)) +
+  geom_line(color = "#4C89C6", linewidth = 1) +
+  geom_point(color = "#4C89C6", size = 3) +
+  geom_errorbar(aes(ymin = mean_precip - se_precip,
+                    ymax = mean_precip + se_precip),
+                width = 0.2, color = "#D95F5F") +
+  geom_vline(xintercept = season_x, color = "#CC4C4C", linewidth = 1) +
+  annotate("text", x = 2, y = -Inf, label = "cool", vjust = -1.2,
+           color = "#CC4C4C", fontface = "bold", size = 5) +
+  annotate("text", x = 8, y = -Inf, label = "warm", vjust = -1.2,
+           color = "#CC4C4C", fontface = "bold", size = 5) +
+  theme_classic() +
+  labs(title = "Precipitation", y = "mm/mo", x = "Month") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 11)
+  )
+
+p_precip
+
+p_wind <- ggplot(mcr_monthly, aes(x = month, y = mean_wind, group = 1)) +
+  geom_line(color = "#4C89C6", linewidth = 1) +
+  geom_point(color = "#4C89C6", size = 3) +
+  geom_errorbar(aes(ymin = mean_wind - se_wind,
+                    ymax = mean_wind + se_wind),
+                width = 0.2, color = "#D95F5F") +
+  geom_vline(xintercept = season_x, color = "#CC4C4C", linewidth = 1) +
+  annotate("text", x = 2, y = -Inf, label = "cool", vjust = -1.2,
+           color = "#CC4C4C", fontface = "bold", size = 5) +
+  annotate("text", x = 8, y = -Inf, label = "warm", vjust = -1.2,
+           color = "#CC4C4C", fontface = "bold", size = 5) +
+  theme_classic() +
+  labs(title = "Wind Speed", y = "m/s", x = "Month") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 11)
+  )
+
+p_wind 
+
+p_photo <- ggplot(photoperiod_monthly, aes(x = month, y = mean_photoperiod, group = 1)) +
+  geom_line(color = "#4C89C6", linewidth = 1) +
+  geom_point(color = "#4C89C6", size = 3) +
+  geom_errorbar(aes(ymin = mean_photoperiod - se_photoperiod,
+                    ymax = mean_photoperiod + se_photoperiod),
+                width = 0.2, color = "#D95F5F") +
+  geom_vline(xintercept = season_x, color = "#CC4C4C", linewidth = 1) +
+  annotate("text", x = 2, y = -Inf, label = "cool", vjust = -1.2,
+           color = "#CC4C4C", fontface = "bold", size = 5) +
+  annotate("text", x = 8, y = -Inf, label = "warm", vjust = -1.2,
+           color = "#CC4C4C", fontface = "bold", size = 5) +
+  theme_classic() +
+  labs(title = "Photoperiod", y = "hr", x = "Month") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 11)
+  )
+
+p_photo
+  
+# FINAL FIGURE 
+(p_temp | p_par) /
+(p_precip | p_wind) /
+p_photo
+```
+```{r}
+month_levels <- c("Dec 2021","Jan 2022","Feb 2022","Mar 2022","Apr 2022","May 2022",
+                  "Jun 2022","Jul 2022","Aug 2022","Sep 2022","Oct 2022","Nov 2022")
+
+temp_monthly <- temp_monthly %>%
+  mutate(month = factor(month, levels = month_levels))
+
+mcr_monthly <- mcr_monthly %>%
+  mutate(month = factor(month, levels = month_levels))
+
+light_monthly <- light_monthly %>%
+  mutate(month = factor(month, levels = month_levels))
+
+photoperiod_monthly <- photoperiod_monthly %>%
+  mutate(month = factor(month, levels = month_levels))
+
+gamete_monthly <- gamete_monthly %>%
+  mutate(month = factor(month, levels = month_levels))
+
+# example z-scores
+env_z <- gamete_monthly %>%
+  left_join(temp_monthly %>% select(month, temp_z = mean_temp), by = "month") %>%
+  left_join(mcr_monthly %>% select(month, wind_z = mean_wind), by = "month") %>%
+  left_join(light_monthly %>% select(month, light_z = mean_light), by = "month") %>%
+  left_join(photoperiod_monthly %>% select(month, photo_z = mean_photoperiod), by = "month")
+
+p_bottom <- ggplot(env_z, aes(x = month)) +
+  geom_col(aes(y = eggs_pct, fill = "Eggs"), width = 0.7) +
+  geom_col(aes(y = sperm_pct, fill = "Sperm"), width = 0.7, position = "stack") +
+  geom_line(aes(y = temp_z, color = "Temperature", group = 1), linewidth = 1) +
+  geom_line(aes(y = wind_z, color = "Wind speed", group = 1), linewidth = 1) +
+  geom_line(aes(y = light_z, color = "Light", group = 1), linewidth = 1) +
+  geom_line(aes(y = photo_z, color = "Photoperiod", group = 1), linewidth = 1) +
+  scale_y_continuous(
+    name = "Z-score",
+    sec.axis = sec_axis(~ ., name = "% individuals with gametes")
+  ) +
+  theme_classic() +
+  labs(x = "Month", fill = NULL, color = NULL)
+
+(p_temp | p_wind) / (p_light | p_photo) / p_bottom
+```
 
