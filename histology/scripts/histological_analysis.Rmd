@@ -383,8 +383,7 @@ oogen <- oogen_size %>%
 ggsave("histology/output/oogen.size.month.boxplot.png", oogen, width = 13, height = 8)
 
 
-# save dataframe for downstream figure
-write.csv(oogen_size, "gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oogen_size_data.csv")
+c
 ```
 
 

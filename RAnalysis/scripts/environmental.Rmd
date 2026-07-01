@@ -632,33 +632,147 @@ bottom_row <- p_photo + plot_spacer()
 bottom_row
 ```
 
+# Bring in histological data to make figures next
+```{r}
+oocyte_abun_data <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oocyte_abun_data.csv")
+sperm_abun_data  <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_abun_data.csv")
+oogen_size_data  <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oogen_size_data.csv")
+sperm_size_data  <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_size_data.csv")
 
+# combine abundance data for gametes
+gamete_monthly <- oocyte_abun_data %>%
+  group_by(timepoint) %>%
+  summarise(eggs_pct = sum(freq[Stage != "Stage 0"], na.rm = TRUE), .groups = "drop") %>%
+  left_join(
+    sperm_abun_data %>%
+      group_by(timepoint) %>%
+      summarise(sperm_pct = sum(freq[Stage != "Stage 0"], na.rm = TRUE), .groups = "drop"),
+    by = "timepoint"
+  )
+```
+
+
+# Make final figure temperature, windspeed, and light for insolation and photoperiod and then the z score of each of these variables on y and x has months from december 2021 to november 2022, then other y axes is % of individuals with gametes the bar columns would then have eggs and sperm percentages (not stages)
 
 ```{r}
-month_levels <- c("Dec 2021","Jan 2022","Feb 2022","Mar 2022","Apr 2022","May 2022",
-                  "Jun 2022","Jul 2022","Aug 2022","Sep 2022","Oct 2022","Nov 2022")
+# monthly labels for final figure
+month_levels <- c(
+  "Dec 2021","Jan 2022","Feb 2022","Mar 2022","Apr 2022","May 2022",
+  "Jun 2022","Jul 2022","Aug 2022","Sep 2022","Oct 2022","Nov 2022"
+)
 
-temp_monthly <- temp_monthly %>%
-  mutate(month = factor(month, levels = month_levels))
+month_map <- c(
+  "Dec" = "Dec 2021",
+  "Jan" = "Jan 2022",
+  "Feb" = "Feb 2022",
+  "Mar" = "Mar 2022",
+  "Apr" = "Apr 2022",
+  "May" = "May 2022",
+  "Jun" = "Jun 2022",
+  "Jul" = "Jul 2022",
+  "Aug" = "Aug 2022",
+  "Sep" = "Sep 2022",
+  "Oct" = "Oct 2022",
+  "Nov" = "Nov 2022"
+)
 
-mcr_monthly <- mcr_monthly %>%
-  mutate(month = factor(month, levels = month_levels))
-
-light_monthly <- light_monthly %>%
-  mutate(month = factor(month, levels = month_levels))
-
-photoperiod_monthly <- photoperiod_monthly %>%
-  mutate(month = factor(month, levels = month_levels))
+# histology abundance summaries
+oocyte_abun_data <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/oocyte_abun_data.csv")
+sperm_abun_data  <- read.csv("gametogenesis_timeseries/gametogenesis_timeseries_analysis/Output/sperm_abun_data.csv")
 
 gamete_monthly <- gamete_monthly %>%
-  mutate(month = factor(month, levels = month_levels))
+  mutate(month = case_when(
+    timepoint == "December"  ~ "Dec 2021",
+    timepoint == "January"   ~ "Jan 2022",
+    timepoint == "February"  ~ "Feb 2022",
+    timepoint == "March"     ~ "Mar 2022",
+    timepoint == "April"     ~ "Apr 2022",
+    timepoint == "May"       ~ "May 2022",
+    timepoint == "June"      ~ "Jun 2022",
+    timepoint == "July"      ~ "Jul 2022",
+    timepoint == "August"    ~ "Aug 2022",
+    timepoint == "September" ~ "Sep 2022",
+    timepoint == "October"   ~ "Oct 2022",
+    timepoint == "November"  ~ "Nov 2022",
+    TRUE ~ NA_character_
+  )) %>%
+  select(month, eggs_pct, sperm_pct)
 
-# example z-scores
+# environmental summaries must also use the same month labels
+temp_monthly <- mean_temp_per_month %>%
+  mutate(
+    month = recode(as.character(month), !!!month_map),
+    month = factor(month, levels = month_levels),
+    temp_z = as.numeric(scale(mean_temp))
+  )
+
+light_monthly <- mean_light_per_month %>%
+  mutate(
+    month = recode(as.character(month), !!!month_map),
+    month = factor(month, levels = month_levels),
+    light_z = as.numeric(scale(mean_light))
+  )
+
+photoperiod_monthly <- photoperiod_monthly %>%
+  mutate(
+    month = as.character(month),
+    month = recode(month, !!!month_map),
+    month = factor(month, levels = month_levels),
+    photo_z = as.numeric(scale(mean_photoperiod))
+  )
+
+mcr_monthly2 <- mcr %>%
+  group_by(month) %>%
+  summarise(
+    mean_precip = mean(cumulative_rainfall_mm, na.rm = TRUE),
+    se_precip = sd(cumulative_rainfall_mm, na.rm = TRUE) / sqrt(sum(!is.na(cumulative_rainfall_mm))),
+    mean_wind = mean(wind_speed, na.rm = TRUE),
+    se_wind = sd(wind_speed, na.rm = TRUE) / sqrt(sum(!is.na(wind_speed))),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    month = factor(month, levels = month.abb),
+    wind_z = as.numeric(scale(mean_wind))
+  )
+
+gamete_monthly <- gamete_monthly %>%
+  mutate(month = as.character(month))
+
+temp_monthly <- temp_monthly %>%
+  mutate(month = as.character(month))
+
+mcr_monthly2 <- mcr_monthly2 %>%
+  mutate(month = as.character(month))
+
+mcr_monthly2 <- mcr_monthly2 %>%
+  mutate(
+    month = case_when(
+      month == "Jan" ~ "Jan 2022",
+      month == "Feb" ~ "Feb 2022",
+      month == "Mar" ~ "Mar 2022",
+      month == "Apr" ~ "Apr 2022",
+      month == "May" ~ "May 2022",
+      month == "Jun" ~ "Jun 2022",
+      month == "Jul" ~ "Jul 2022",
+      month == "Aug" ~ "Aug 2022",
+      month == "Sep" ~ "Sep 2022",
+      month == "Oct" ~ "Oct 2022",
+      month == "Nov" ~ "Nov 2022",
+      month == "Dec" ~ "Dec 2021"
+    )
+  )
+
+light_monthly <- light_monthly %>%
+  mutate(month = as.character(month))
+
+photoperiod_monthly <- photoperiod_monthly %>%
+  mutate(month = as.character(month))
+
 env_z <- gamete_monthly %>%
-  left_join(temp_monthly %>% select(month, temp_z = mean_temp), by = "month") %>%
-  left_join(mcr_monthly %>% select(month, wind_z = mean_wind), by = "month") %>%
-  left_join(light_monthly %>% select(month, light_z = mean_light), by = "month") %>%
-  left_join(photoperiod_monthly %>% select(month, photo_z = mean_photoperiod), by = "month")
+  left_join(temp_monthly %>% select(month, temp_z), by = "month") %>%
+  left_join(mcr_monthly2 %>% select(month, wind_z), by = "month") %>%
+  left_join(light_monthly %>% select(month, light_z), by = "month") %>%
+  left_join(photoperiod_monthly %>% select(month, photo_z), by = "month")
 
 p_bottom <- ggplot(env_z, aes(x = month)) +
   geom_col(aes(y = eggs_pct, fill = "Eggs"), width = 0.7) +
@@ -671,9 +785,19 @@ p_bottom <- ggplot(env_z, aes(x = month)) +
     name = "Z-score",
     sec.axis = sec_axis(~ ., name = "% individuals with gametes")
   ) +
+  scale_fill_manual(values = c("Eggs" = "#4C89C6", "Sperm" = "#808080")) +
+  scale_color_manual(values = c(
+    "Temperature" = "#1b9e77",
+    "Wind speed" = "#d95f02",
+    "Light" = "#7570b3",
+    "Photoperiod" = "#e7298a"
+  )) +
   theme_classic() +
-  labs(x = "Month", fill = NULL, color = NULL)
+  labs(x = "Month", fill = NULL, color = NULL) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "top")
 
-(p_temp | p_wind) / (p_light | p_photo) / p_bottom
+(p_temp | p_wind) / (p_par | p_photo) / p_bottom
 ```
 
