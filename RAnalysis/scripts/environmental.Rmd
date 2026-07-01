@@ -652,7 +652,7 @@ gamete_monthly <- oocyte_abun_data %>%
 ```
 
 
-# Make final figure temperature, windspeed, and light for insolation and photoperiod and then the z score of each of these variables on y and x has months from december 2021 to november 2022, then other y axes is % of individuals with gametes the bar columns would then have eggs and sperm percentages (not stages)
+# Calcualter z scores from the various files and variables
 
 ```{r}
 # monthly labels for final figure
@@ -774,29 +774,91 @@ env_z <- gamete_monthly %>%
   left_join(light_monthly %>% select(month, light_z), by = "month") %>%
   left_join(photoperiod_monthly %>% select(month, photo_z), by = "month")
 
-p_bottom <- ggplot(env_z, aes(x = month)) +
-  geom_col(aes(y = eggs_pct, fill = "Eggs"), width = 0.7) +
-  geom_col(aes(y = sperm_pct, fill = "Sperm"), width = 0.7, position = "stack") +
-  geom_line(aes(y = temp_z, color = "Temperature", group = 1), linewidth = 1) +
-  geom_line(aes(y = wind_z, color = "Wind speed", group = 1), linewidth = 1) +
-  geom_line(aes(y = light_z, color = "Light", group = 1), linewidth = 1) +
-  geom_line(aes(y = photo_z, color = "Photoperiod", group = 1), linewidth = 1) +
+```
+
+# Make final figure temperature, windspeed, and light for insolation and photoperiod and then the z score of each of these variables on y and x has months from december 2021 to november 2022, then other y axes is % of individuals with gametes the bar columns would then have eggs and sperm percentages (not stages)
+
+```{r}
+# use a rescaling transofrmation to have z scores on the left and percentages for gametes on the right
+
+z_min <- -2
+z_max <- 2
+
+month_levels <- c(
+  "Dec 2021","Jan 2022","Feb 2022","Mar 2022","Apr 2022","May 2022",
+  "Jun 2022","Jul 2022","Aug 2022","Sep 2022","Oct 2022","Nov 2022"
+)
+
+month_scaffold <- tibble(month = month_levels)
+
+env_z <- month_scaffold %>%
+  left_join(gamete_monthly, by = "month") %>%
+  left_join(temp_monthly %>% select(month, temp_z), by = "month") %>%
+  left_join(mcr_monthly2 %>% select(month, wind_z), by = "month") %>%
+  left_join(light_monthly %>% select(month, light_z), by = "month") %>%
+  left_join(photoperiod_monthly %>% select(month, photo_z), by = "month") %>%
+  mutate(
+    month = factor(month, levels = month_levels),
+    month_num = as.numeric(month)
+  )
+
+bar_width <- 0.4
+gap <- 0.03
+
+bars_long <- env_z %>%
+  select(month, month_num, eggs_pct, sperm_pct) %>%
+  tidyr::pivot_longer(
+    cols = c(eggs_pct, sperm_pct),
+    names_to = "type",
+    values_to = "pct"
+  ) %>%
+  filter(!is.na(pct)) %>%          # <- drop truly missing months instead of plotting them as 0
+  mutate(
+    type = recode(type, eggs_pct = "Eggs", sperm_pct = "Sperm"),
+    value = z_min + (pct / 100) * (z_max - z_min),
+    offset = ifelse(type == "Eggs",
+                     -(bar_width / 2 + gap / 2),
+                      (bar_width / 2 + gap / 2)),
+    xmin = month_num + offset - bar_width / 2,
+    xmax = month_num + offset + bar_width / 2
+  )
+
+p_bottom <- ggplot() +
+  geom_rect(
+    data = bars_long,
+    aes(xmin = xmin, xmax = xmax, ymin = z_min, ymax = value, fill = type),  # <- explicit baseline
+    color = NA
+  ) +
+  geom_line(data = env_z2, aes(x = month_num, y = temp_z,  color = "Temperature", group = 1), linewidth = 1) +
+  geom_line(data = env_z2, aes(x = month_num, y = wind_z,  color = "Wind speed",  group = 1), linewidth = 1) +
+  geom_line(data = env_z2, aes(x = month_num, y = light_z, color = "Light",       group = 1), linewidth = 1) +
+  geom_line(data = env_z2, aes(x = month_num, y = photo_z, color = "Photoperiod", group = 1), linewidth = 1) +
+  scale_x_continuous(
+    breaks = 1:12,
+    labels = month_levels,
+    expand = expansion(add = 0.6)
+  ) +
   scale_y_continuous(
     name = "Z-score",
-    sec.axis = sec_axis(~ ., name = "% individuals with gametes")
+    limits = c(z_min, z_max),
+    sec.axis = sec_axis(~ (. - z_min) / (z_max - z_min) * 100,
+                        name = "% individuals with gametes")
   ) +
   scale_fill_manual(values = c("Eggs" = "#4C89C6", "Sperm" = "#808080")) +
   scale_color_manual(values = c(
     "Temperature" = "#1b9e77",
-    "Wind speed" = "#d95f02",
-    "Light" = "#7570b3",
+    "Wind speed"  = "#d95f02",
+    "Light"       = "#7570b3",
     "Photoperiod" = "#e7298a"
   )) +
   theme_classic() +
   labs(x = "Month", fill = NULL, color = NULL) +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = "top")
+    legend.position = "top"
+  )
+
+p_bottom
 
 (p_temp | p_wind) / (p_par | p_photo) / p_bottom
 ```
